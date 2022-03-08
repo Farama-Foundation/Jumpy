@@ -18,7 +18,7 @@ To install Jumpy from pypi:
 python3 -m venv env
 source env/bin/activate
 pip install --upgrade pip
-pip install jumpy
+pip install brax-jumpy
 ```
 
 Alternatively, to install Jumpy from source, clone this repo, `cd` to it, and then:
@@ -27,6 +27,5 @@ Alternatively, to install Jumpy from source, clone this repo, `cd` to it, and th
 python3 -m venv env
 source env/bin/activate
 pip install --upgrade pip
-cd jumpy
 pip install -e .
 ```
