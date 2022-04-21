@@ -41,22 +41,33 @@ def vmap(fun: F, include: Optional[Sequence[bool]] = None) -> F:
       in_axes = [0 if inc else None for inc in include]
     return jax.vmap(fun, in_axes=in_axes)
 
-  def _batched(*args):
-    args_flat, args_treedef = jax.tree_flatten(args)
-    vargs, vargs_idx = [], []
+  def _batched(*args, include=include):
+    if include is not None and len(include) != len(args):
+      raise RuntimeError('Len of `args` list must match length of `include`.')
+
+    # by default, vectorize over every arg
+    if include is None:
+      include = [True for _ in args]
+
+    # determine number of parallel evaluations to unroll into serial evals
+    batch_size = None
+    for a, inc in zip(args, include):
+      if inc:
+        flat_args, _ = jax.tree_flatten(a)
+        batch_size = flat_args[0].shape[0]
+        break
+
+    # rebuild b_args for each serial evaluation
     rets = []
-    if include:
-      for i, (inc, arg) in enumerate(zip(include, args_flat)):
+    for b_idx in range(batch_size):
+      b_args = []
+      for a, inc in zip(args, include):
         if inc:
-          vargs.append(arg)
-          vargs_idx.append(i)
-    else:
-      vargs, vargs_idx = list(args_flat), list(range(len(args_flat)))
-    for zvargs in zip(*vargs):
-      for varg, idx in zip(zvargs, vargs_idx):
-        args_flat[idx] = varg
-      args_unflat = jax.tree_unflatten(args_treedef, args_flat)
-      rets.append(fun(*args_unflat))
+          b_args.append(take(a, b_idx))
+        else:
+          b_args.append(a)
+      rets.append(fun(*b_args))
+
     return jax.tree_map(lambda *x: onp.stack(x), *rets)
 
   return _batched
@@ -87,6 +98,32 @@ def scan(f: Callable[[Carry, X], Tuple[Carry, Y]],
       ys.append(y)
     stacked_y = jax.tree_map(lambda *y: onp.vstack(y), *maybe_reversed(ys))
     return carry, stacked_y
+
+
+def while_loop(cond_fun: Callable[[X], Any],
+               body_fun: Callable[[X], X],
+               init_val: X) -> X:
+  """Call body function while conditional function is true, starting with state"""
+  if _in_jit():
+    return jax.lax.while_loop(cond_fun, body_fun, init_val)
+  else:
+    val = init_val
+    while cond_fun(val):
+      val = body_fun(val)
+    return val
+
+
+def fori_loop(lower: int, upper: int,
+               body_fun: Callable[[X], X],
+               init_val: X) -> X:
+  """Call body function over range from lower to upper, starting with state"""
+  if _in_jit():
+    return jax.lax.fori_loop(lower, upper, body_fun, init_val)
+  else:
+    val = init_val
+    for i in range(lower, upper):
+      val = body_fun(val)
+    return val
 
 
 def take(tree: Any, i: Union[ndarray, Sequence[int]], axis: int = 0) -> Any:
@@ -243,9 +280,24 @@ def _safe_arccos_jvp(primal, tangent):
   return primal_out, tangent_out
 
 
+def arcsin(x: ndarray) -> ndarray:
+  """Trigonometric inverse sine, element-wise."""
+  return _which_np(x).arcsin(x)
+
+
 def logical_not(x: ndarray) -> ndarray:
   """Returns the truth value of NOT x element-wise."""
   return _which_np(x).logical_not(x)
+
+
+def logical_and(x1: ndarray, x2: ndarray) -> ndarray:
+  """Returns the truth value of x1 AND x2 element-wise."""
+  return _which_np(x1, x2).logical_and(x1, x2)
+
+
+def logical_or(x1: ndarray, x2: ndarray) -> ndarray:
+  """Returns the truth value of x1 OR x2 element-wise."""
+  return _which_np(x1, x2).logical_or(x1, x2)
 
 
 def multiply(x1: ndarray, x2: ndarray) -> ndarray:
@@ -258,9 +310,19 @@ def minimum(x1: ndarray, x2: ndarray) -> ndarray:
   return _which_np(x1, x2).minimum(x1, x2)
 
 
+def maximum(x1: ndarray, x2: ndarray) -> ndarray:
+  """Element-wise maximum of array elements."""
+  return _which_np(x1, x2).maximum(x1, x2)
+
+
 def amin(x: ndarray) -> ndarray:
   """Returns the minimum along a given axis."""
   return _which_np(x).amin(x)
+
+
+def amax(x: ndarray) -> ndarray:
+  """Returns the maximum along a given axis."""
+  return _which_np(x).amax(x)
 
 
 def exp(x: ndarray) -> ndarray:
@@ -307,6 +369,24 @@ def random_split(rng: ndarray, num: int = 2) -> ndarray:
     return rng.integers(low=0, high=2**32, dtype='uint32', size=(num, 2))
 
 
+def randint(rng: ndarray, shape: Tuple[int, ...] = (),
+            low: Optional[int] = 0, high: Optional[int] = 1) -> ndarray:
+  """Sample integers in [low, high) with given shape."""
+  if _which_np(rng) is jnp:
+    return jax.random.randint(rng, shape=shape, minval=low, maxval=high)
+  else:
+    return onp.random.default_rng(rng).integers(low=low, high=high, size=shape)
+
+
+def choice(rng: ndarray, a: Union[int, Any], shape: Tuple[int, ...] = (),
+           replace: bool = True, p: Optional[Any] = None, axis: int = 0) -> ndarray:
+  """Generate sample(s) from given array"""
+  if _which_np(rng) is jnp:
+    return jax.random.choice(rng, a, shape=shape, replace=replace, p=p, axis=axis)
+  else:
+    return onp.random.default_rng(rng).choice(a, size=shape, replace=replace, p=p, axis=axis)
+
+
 def segment_sum(data: ndarray,
                 segment_ids: ndarray,
                 num_segments: Optional[int] = None) -> ndarray:
@@ -350,6 +430,17 @@ def where(condition: ndarray, x: ndarray, y: ndarray) -> ndarray:
   return _which_np(condition, x, y).where(condition, x, y)
 
 
+def cond(pred, true_fun: Callable, false_fun: Callable, *operands: Any):
+  """Conditionally apply true_fun or false_fun to operands"""
+  if _in_jit():
+    return jax.lax.cond(pred, true_fun, false_fun, *operands)
+  else:
+    if pred:
+      return true_fun(operands)
+    else:
+      return false_fun(operands)
+
+
 def diag(v: ndarray, k: int = 0) -> ndarray:
   """Extract a diagonal or construct a diagonal array."""
   return _which_np(v).diag(v, k)
@@ -390,6 +481,21 @@ def reshape(a: ndarray, newshape: Union[Tuple[int, ...], int]) -> ndarray:
   return _which_np(a).reshape(a, newshape)
 
 
+def atleast_1d(*arys) -> ndarray:
+  """Ensure arrays are all at least 1d (dimensions added to beginning)"""
+  return _which_np(*arys).atleast_1d(*arys)
+
+
+def atleast_2d(*arys) -> ndarray:
+  """Ensure arrays are all at least 2d (dimensions added to beginning)"""
+  return _which_np(*arys).atleast_2d(*arys)
+
+
+def atleast_3d(*arys) -> ndarray:
+  """Ensure arrays are all at least 3d (dimensions added to beginning)"""
+  return _which_np(*arys).atleast_3d(*arys)
+
+
 def array(object: Any, dtype=None) -> ndarray:
   """Creates an array given a list."""
   try:
@@ -402,3 +508,10 @@ def array(object: Any, dtype=None) -> ndarray:
 def abs(a: ndarray) -> ndarray:
   """Calculate the absolute value element-wise."""
   return _which_np(a).abs(a)
+
+
+def meshgrid(*xi, copy: bool = True, sparse: bool = False, indexing: str = 'xy') -> ndarray:
+  """Create N-D coordinate matrices from 1D coordinate vectors"""
+  if _which_np(xi[0]) is jnp:
+    return jnp.meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
+  return onp.meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
