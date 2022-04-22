@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name="brax-jumpy",
-    version="0.0.1",
+    version="0.0.2",
     description=("Common backend for JAX or numpy."),
     author="Brax Authors",
     author_email="no-reply@google.com",
