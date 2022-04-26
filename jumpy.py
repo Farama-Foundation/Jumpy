@@ -1,5 +1,12 @@
 # pylint:disable=redefined-builtin
-"""Numpy backend for JAX that is called for non-jit/non-jax arrays."""
+"""
+Numpy backend for JAX that is called for non-jit/non-jax arrays.
+
+This file was originally copied from https://github.com/google/brax/blob/main/brax/jumpy.py
+Under the Apache 2.0 license
+
+Copyright is held by the authors
+"""
 
 from typing import Any, Callable, List, Optional, Sequence, Tuple, TypeVar, Union
 
