@@ -1,39 +1,53 @@
 # pylint:disable=redefined-builtin
 
 
+import pytest
 import jax
 import numpy as onp
+import jax.numpy as jnp
 
 import jumpy as jp
 
 
-def test_scan():
-    A, A_len = jp.arange(1, 11).reshape((5, 2)), 5
-    B, B_len = {"k1": jp.arange(1, 11).reshape((5, 2)), "k2": (jp.arange(1, 11).reshape((5, 2)), jp.arange(1, 11).reshape((5, 2)))}, 5
-
-    def fun1(x, y):
+@pytest.mark.parametrize("array,length", [
+    (jp.arange(1, 11).reshape((5, 2)), 5)
+])
+def test_array(array, length):
+    def fun(x, y):
         x += y.sum()
         return x, y * x
-
-    def fun2(x, y):
-        x += y["k1"].sum() * y["k2"][0].sum() * y["k2"][1].sum()
-        return x, {"k1": y["k1"] * -1, "k2": (y["k2"][0] * 2, y["k2"][1] * 3)}
     
-    (x1, x2), (y1, y2) = jax.lax.scan(fun1, 0, A, length=A_len), jp.scan(fun1, 0, A, length=A_len)
+    (x1, x2), (y1, y2) = jax.lax.scan(fun, 0, array, length=length), jp.scan(fun, 0, array, length=length)
 
     assert onp.array_equal(x1, y1)
     assert onp.array_equal(x2, y2)
 
     # Reversed
-    (x1, x2), (y1, y2) = jax.lax.scan(fun1, 0, A, length=A_len, reverse=True), jp.scan(fun1, 0, A, length=A_len, reverse=True)
+    (x1, x2), (y1, y2) = jax.lax.scan(fun, 0, array, length=length, reverse=True), jp.scan(fun, 0, array, length=length, reverse=True)
 
     assert onp.array_equal(x1, y1)
     assert onp.array_equal(x2, y2)
 
-    # Pytree argument
-    (x1, x2), (y1, y2) = jax.lax.scan(fun2, 0, B, length=B_len), jp.scan(fun2, 0, B, length=B_len)
+
+def compare_ndarray_dicts(first, second):
+    """Return whether two dicts of arrays are exactly equal"""
+    if first.keys() != second.keys():
+        return False
+    return all(onp.array_equal(first[key], second[key]) for key in first)
+
+
+@pytest.mark.parametrize("tree,length", [
+    ({"k1": jp.arange(1, 11).reshape((5, 2)), "k2": jp.arange(1, 11).reshape((5, 2))}, 5)
+])
+def test_dict(tree, length):
+    def fun(x, y):
+        ret = {}
+        for key, val in y.items():
+            x += jnp.sum(val)
+            ret[key] = val * -1
+        return x, ret
+    
+    (x1, x2), (y1, y2) = jax.lax.scan(fun, 0, tree, length=length), jp.scan(fun, 0, tree, length=length)
 
     assert onp.array_equal(x1, y1)
-    assert onp.array_equal(x2["k1"], y2["k1"])
-    assert onp.array_equal(x2["k2"][0], y2["k2"][0])
-    assert onp.array_equal(x2["k2"][1], y2["k2"][1])
+    assert all(onp.array_equal(x2[key], y2[key]) for key in x2)
