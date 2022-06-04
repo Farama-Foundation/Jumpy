@@ -18,11 +18,6 @@ setup(
     url="http://github.com/google/brax",
     license="Apache 2.0",
     py_modules=["jumpy"],
-    install_requires=[
-        "jax",
-        "jaxlib",
-        "numpy",
-    ],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -31,4 +26,14 @@ setup(
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
+    install_requires=[
+        "jax",
+        "jaxlib",
+        "numpy",
+    ],
+    extras_require={
+        'dev': [
+            'pytest',
+        ]
+    }
 )
