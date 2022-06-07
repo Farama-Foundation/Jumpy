@@ -257,8 +257,8 @@ def test_arccos():
     Calls the function `arccos` on both `onp.array` and `jnp.array`
     and checks the respective return types
     """
-    A = onp.array([1, 2, 3])
-    B = jnp.array([1, 2, 3])
+    A = onp.array([-1, 0, 1])
+    B = jnp.array([-1, 0, 1])
 
     _check_types(A, jp.arccos(A))
     _check_types(B, jp.arccos(B))
@@ -269,8 +269,8 @@ def test_safe_arccos():
     Calls the function `safe_arccos` on both `onp.array` and `jnp.array`
     and checks the respective return types
     """
-    A = onp.array([1, 2, 3])
-    B = jnp.array([1, 2, 3])
+    A = onp.array([-1, 0, 1])
+    B = jnp.array([-1, 0, 1])
 
     _check_types(A, jp.safe_arccos(A))
     _check_types(B, jp.safe_arccos(B))
@@ -281,8 +281,8 @@ def test_arcsin():
     Calls the function `arcsin` on both `onp.array` and `jnp.array`
     and checks the respective return types
     """
-    A = onp.array([1, 2, 3])
-    B = jnp.array([1, 2, 3])
+    A = onp.array([-1, 0, 1])
+    B = jnp.array([-1, 0, 1])
 
     _check_types(A, jp.arcsin(A))
     _check_types(B, jp.arcsin(B))
