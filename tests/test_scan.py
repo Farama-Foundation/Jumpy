@@ -28,7 +28,7 @@ def test_array(array, length):
     assert onp.array_equal(y1, y2)
 
     # Reversed
-    carry1, y1 = jax.lax.scan(fun, 0, array, length=length, reverse=True), 
+    carry1, y1 = jax.lax.scan(fun, 0, array, length=length, reverse=True)
     carry2, y2 = jp.scan(fun, 0, array, length=length, reverse=True)
 
     assert onp.array_equal(carry1, carry2)
