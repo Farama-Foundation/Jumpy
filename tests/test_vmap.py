@@ -13,16 +13,23 @@ def _convert_to_jax_axes(booleans):
 
 
 @pytest.mark.parametrize("fun, args, includes", [
+    # Two-parameters function
     (lambda x, y: jp.dot(x, y), (jp.ones((6, 5, 4)), jp.ones((6, 4, 3))), [False, True]),
+    # Three-parameters function
     (lambda x, y, z: jp.dot(jp.dot(x, y), z), (jp.ones((6, 5, 4)), jp.ones((6, 4, 3)), jp.ones((6, 3, 7))), [False, True, True]),
     (lambda x, y, z: jp.dot(jp.dot(x, y), z), (jp.ones((6, 5, 4)), jp.ones((6, 4, 3)), jp.ones((6, 3, 7))), [False, True, False]),
 ])
 def test_vmap(fun, args, includes):
-    x1, y1 = jp.vmap(fun, include=includes)(*args), jax.vmap(fun, in_axes=_convert_to_jax_axes(includes))(*args)
+    """ 
+    Tests `vmap` function equivalency with `jax.vmap`
+    """
+    x1 = jp.vmap(fun, include=includes)(*args)
+    y1 = jax.vmap(fun, in_axes=_convert_to_jax_axes(includes))(*args)
     assert onp.array_equal(x1, y1)
     
     # Empty include
-    x1, y1 = jp.vmap(fun, include=None)(*args), jax.vmap(fun, in_axes=0)(*args)
+    x1 = jp.vmap(fun, include=None)(*args)
+    y1 = jax.vmap(fun, in_axes=0)(*args)
     assert onp.array_equal(x1, y1)
     
     # Wrong input number
