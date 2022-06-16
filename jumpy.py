@@ -181,9 +181,9 @@ def var(a: ndarray, axis: Optional[int] = None) -> ndarray:
   return _which_np(a).var(a, axis=axis)
 
 
-def arange(start: int, stop: int) -> ndarray:
+def arange(start: int, stop: int, dtype=float) -> ndarray:
   """Return evenly spaced values within a given interval."""
-  return _which_np().arange(start, stop)
+  return _which_dtype(dtype).arange(start, stop, dtype=dtype)
 
 
 def dot(x: ndarray, y: ndarray) -> ndarray:
@@ -398,14 +398,14 @@ def clip(a: ndarray, a_min: ndarray, a_max: ndarray) -> ndarray:
   return _which_np(a, a_min, a_max).clip(a, a_min, a_max)
 
 
-def eye(n: int) -> ndarray:
+def eye(n: int, dtype=float) -> ndarray:
   """Return a 2-D array with ones on the diagonal and zeros elsewhere."""
-  return _which_np().eye(n)
+  return _which_dtype(dtype).eye(n, dtype=dtype)
 
 
 def zeros(shape, dtype=float) -> ndarray:
   """Return a new array of given shape and type, filled with zeros."""
-  return _which_np().zeros(shape, dtype=dtype)
+  return _which_dtype(dtype).zeros(shape, dtype=dtype)
 
 
 def zeros_like(a: ndarray) -> ndarray:
@@ -415,7 +415,7 @@ def zeros_like(a: ndarray) -> ndarray:
 
 def ones(shape, dtype=float) -> ndarray:
   """Return a new array of given shape and type, filled with ones."""
-  return _which_np().ones(shape, dtype=dtype)
+  return _which_dtype(dtype).ones(shape, dtype=dtype)
 
 
 def ones_like(a: ndarray) -> ndarray:
