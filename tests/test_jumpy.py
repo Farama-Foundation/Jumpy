@@ -98,9 +98,13 @@ def test_arange():
     
     A = jp.arange(0, 10)
     B = jit_arange().block_until_ready()
+    C = jp.arange(0, 10, dtype=int)
+    D = jp.arange(0, 10, dtype=jnp.int32)
 
     assert isinstance(A, onp.ndarray)
     assert isinstance(B, jnp.ndarray)
+    assert isinstance(C, onp.ndarray)
+    assert isinstance(D, jnp.ndarray)
 
 
 def test_dot():
@@ -485,15 +489,30 @@ def test_eye():
     """
     Calls the function `eye` to check it doesn't raise an error
     """
-    jp.eye(3)
+    A = jp.eye(3)
+    B = jp.eye(3, dtype=int)
+    C = jp.eye(3, dtype=jnp.float32)
+    D = jp.eye(3, dtype=jnp.int32)
+
+    isinstance(A, onp.ndarray)
+    isinstance(B, onp.ndarray)
+    isinstance(C, jnp.ndarray)
+    isinstance(D, jnp.ndarray)
 
 
 def test_zeros():
     """
     Calls the function `zeros` to check it doesn't raise an error
     """
-    jp.zeros((3,3,5))
-    jp.zeros((3,3,5), dtype=int)
+    A = jp.zeros((3,3,5))
+    B = jp.zeros((3,3,5), dtype=int)
+    C = jp.zeros((3,3,5), dtype=jnp.float32)
+    D = jp.zeros((3,3,5), dtype=jnp.int32)
+
+    isinstance(A, onp.ndarray)
+    isinstance(B, onp.ndarray)
+    isinstance(C, jnp.ndarray)
+    isinstance(D, jnp.ndarray)
 
 
 def test_zeros_like():
@@ -512,8 +531,15 @@ def test_ones():
     """
     Calls the function `ones` to check it doesn't raise an error
     """
-    jp.ones((3,3,5))
-    jp.ones((3,3,5), dtype=int)
+    A = jp.ones((3,3,5))
+    B = jp.ones((3,3,5), dtype=int)
+    C = jp.ones((3,3,5), dtype=jnp.float32)
+    D = jp.ones((3,3,5), dtype=jnp.int32)
+
+    isinstance(A, onp.ndarray)
+    isinstance(B, onp.ndarray)
+    isinstance(C, jnp.ndarray)
+    isinstance(D, jnp.ndarray)
 
 
 def test_ones_like():
@@ -544,10 +570,17 @@ def test_array():
     """
     Tests whether array creation runs without errors
     """
-    jp.array([])
-    jp.array([1, 2, 3])
-    jp.array([1, 2, 3], dtype=float)
-    jp.array([[1, 2], [3, 4]])
+    A = jp.array([])
+    B = jp.array([1, 2, 3])
+    C = jp.array([1, 2, 3], dtype=float)
+    D = jp.array([[1, 2], [3, 4]])
+    E = jp.array([1, 2, 3], jnp.int32)
+
+    isinstance(A, onp.ndarray)
+    isinstance(B, onp.ndarray)
+    isinstance(C, onp.ndarray)
+    isinstance(D, onp.ndarray)
+    isinstance(E, jnp.ndarray)
 
 
 def test_abs():
