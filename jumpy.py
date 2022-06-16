@@ -37,6 +37,11 @@ def _which_np(*args):
   return onp
 
 
+def _which_dtype(dtype):
+  """Returns np or jnp depending on dtype."""
+  return jnp if dtype.__module__ == "jax.numpy" else onp
+
+
 F = TypeVar('F', bound=Callable)
 
 
