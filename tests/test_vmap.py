@@ -4,7 +4,7 @@
 import pytest
 import jax
 import numpy as onp
-from jumpy import numpy as jnp
+from jax import numpy as jnp
 
 import jumpy as jp
 
