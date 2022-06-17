@@ -3,12 +3,15 @@
 
 import pytest
 import numpy as onp
+from jax import numpy as jnp
 
 import jumpy as jp
 
 
 @pytest.mark.parametrize("x, k, ret", [
     (jp.array([5, 7, 1, 2]), 2, ([5, 7], [0, 1])),
+    # Jax array
+    (jp.array([5, 7, 1, 2], dtype=jnp.float32), 2, ([5, 7], [0, 1])),
 ])
 def test_top_k(x, k, ret):
     """

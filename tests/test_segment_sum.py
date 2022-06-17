@@ -3,12 +3,16 @@
 
 import pytest
 import numpy as onp
+from jax import numpy as jnp
 
 import jumpy as jp
 
 
 @pytest.mark.parametrize("data, segment_ids, ret", [
-    (jp.arange(0, 5), jp.array([0, 0, 1, 1, 2]), jp.array([1, 5, 4])),
+    # Numpy array
+    (jp.arange(0, 5, dtype=int), jp.array([0, 0, 1, 1, 2], dtype=int), jp.array([1, 5, 4], dtype=int)),
+    # Jax array
+    (jp.arange(0, 5, dtype=jnp.int32), jp.array([0, 0, 1, 1, 2], dtype=jnp.int32), jp.array([1, 5, 4], dtype=jnp.int32)),
 ])
 def test_segment_sum(data, segment_ids, ret):
     """

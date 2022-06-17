@@ -4,6 +4,7 @@
 import pytest
 import jax
 import numpy as onp
+from jumpy import numpy as jnp
 
 import jumpy as jp
 
@@ -18,6 +19,8 @@ def _convert_to_jax_axes(booleans):
     # Three-parameters function
     (lambda x, y, z: jp.dot(jp.dot(x, y), z), (jp.ones((6, 5, 4)), jp.ones((6, 4, 3)), jp.ones((6, 3, 7))), [False, True, True]),
     (lambda x, y, z: jp.dot(jp.dot(x, y), z), (jp.ones((6, 5, 4)), jp.ones((6, 4, 3)), jp.ones((6, 3, 7))), [False, True, False]),
+    # Jax input
+    (lambda x, y: jp.dot(x, y), (jp.ones((6, 5, 4), dtype=jnp.float32), jp.ones((6, 4, 3), dtype=jnp.float32)), [False, True]),
 ])
 def test_vmap(fun, args, includes):
     """ 

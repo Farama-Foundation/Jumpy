@@ -33,6 +33,8 @@ def test_norm(x, axis):
 
 @pytest.mark.parametrize("x, axis, res", [
     (jp.array([1, 0, 0], dtype=float), None, jp.array([1, 0, 0], dtype=float)),
+    # Jax input
+    (jp.array([1, 0, 0], dtype=jnp.float32), None, jp.array([1, 0, 0], dtype=jnp.float32)),
     # "Unsafe" input 
     (jp.zeros(3, dtype=float), None, jp.zeros(3, dtype=float)),
     # Empty input

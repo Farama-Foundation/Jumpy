@@ -3,6 +3,7 @@
 
 import pytest
 import numpy as onp
+from jax import numpy as jnp
 
 import jumpy as jp
 
@@ -16,6 +17,8 @@ import jumpy as jp
     (jp.arange(1, 13).reshape((4, 3)), jp.array([0, 3]), jp.arange(1, 7).reshape((2, 3))),
     # Negative index
     (jp.arange(1, 11), -2, 10),
+    # Jax array
+    (jp.arange(1, 11, dtype=jnp.float32), 0, 10),
 ])
 def test_correct_updates(array, index, val):
     """

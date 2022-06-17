@@ -11,6 +11,8 @@ import jumpy as jp
 
 @pytest.mark.parametrize("array, length", [
     (jp.arange(1, 11).reshape((5, 2)), 5),
+    # Jax input
+    (jp.arange(1, 11, dtype=jnp.float32).reshape((5, 2)), 5),
 ])
 def test_array(array, length):
     """ 
