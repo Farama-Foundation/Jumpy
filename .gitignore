@@ -9,3 +9,4 @@ build
 htmlcov
 *.egg-info/
 .envrc
+dist
