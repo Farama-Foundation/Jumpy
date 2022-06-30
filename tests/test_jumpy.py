@@ -300,8 +300,8 @@ def test_logical_not():
     A = onp.array([1, 2, 3])
     B = jnp.array([1, 2, 3])
 
-    _check_types(A, jp.arcsin(A))
-    _check_types(B, jp.arcsin(B))
+    _check_types(A, jp.logical_not(A))
+    _check_types(B, jp.logical_not(B))
 
 
 def test_logical_and():
