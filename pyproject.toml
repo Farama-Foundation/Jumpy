@@ -28,6 +28,9 @@ dev = [
     "pytest",
 ]
 
+[tool.hatch.build.targets.wheel]
+only-include = ["jumpy.py"]
+
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.4.0"]
 build-backend = "hatchling.build"
