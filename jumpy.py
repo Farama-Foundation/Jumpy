@@ -18,6 +18,7 @@ import numpy as onp
 
 ndarray = Union[onp.ndarray, jnp.ndarray]  # pylint:disable=invalid-name
 tree_map = jax.tree_map  # works great with jax or numpy as-is
+dtype = onp.dtype
 pi = onp.pi
 inf = onp.inf
 float32 = onp.float32
