@@ -3,7 +3,7 @@ name = "brax-jumpy"
 description = "Common backend for JAX or numpy."
 version = "0.0.2"
 authors = [
-    { name = "Brax Authors", email = "no-reply@google.com" }
+    { name = "Farama Foundation", email = "jkterry@farama.org" }
 ]
 readme = "README.md"
 license = { file="LICENSE" }
@@ -15,7 +15,10 @@ classifiers = [
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-urls = {Homepage = "http://github.com/google/brax"}
+urls = {
+     Homepage = "https://farama.org/",
+     Repository = "https://github.com/Farama-Foundation/Jumpy",
+}
 
 dependencies = [
     "jax",
