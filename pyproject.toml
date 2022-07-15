@@ -15,16 +15,17 @@ classifiers = [
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-urls = {
-     Homepage = "https://farama.org/",
-     Repository = "https://github.com/Farama-Foundation/Jumpy",
-}
+
 
 dependencies = [
     "jax",
     "jaxlib",
     "numpy",
 ]
+
+[project.urls]
+Homepage = "https://farama.org/"
+Repository = "https://github.com/Farama-Foundation/Jumpy"
 
 [project.optional-dependencies]
 dev = [
