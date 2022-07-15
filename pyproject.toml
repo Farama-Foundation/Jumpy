@@ -1,0 +1,40 @@
+[project]
+name = "brax-jumpy"
+description = "Common backend for JAX or numpy."
+version = "0.0.2"
+authors = [
+    { name = "Farama Foundation", email = "jkterry@farama.org" }
+]
+readme = "README.md"
+license = { file="LICENSE" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+
+dependencies = [
+    "jax",
+    "jaxlib",
+    "numpy",
+]
+
+[project.urls]
+Homepage = "https://farama.org/"
+Repository = "https://github.com/Farama-Foundation/Jumpy"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["jumpy.py"]
+
+[build-system]
+requires = ["hatchling>=1.4.0"]
+build-backend = "hatchling.build"
