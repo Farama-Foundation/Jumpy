@@ -1,7 +1,7 @@
 [project]
 name = "brax-jumpy"
 description = "Common backend for JAX or numpy."
-version = "0.0.2"
+version = "0.1.0"
 authors = [
     { name = "Farama Foundation", email = "jkterry@farama.org" }
 ]
