@@ -1,7 +1,7 @@
 # JumPy
 
 JumPy is a common backend for [JAX](https://github.com/google/jax) or
-[numpy](https://numpy.org/):
+[NumPy](https://numpy.org/):
 
 * A jumpy function returns a JAX outputs if given a JAX inputs
 * A jumpy function returns a JAX outputs if jitted
@@ -9,6 +9,8 @@ JumPy is a common backend for [JAX](https://github.com/google/jax) or
 
 JumPy lets you write framework agnostic code that is easy to debug by running
 as raw numpy, but is just as performant as JAX when jitted.
+
+We maintain this repository primarily so to enable write Gymnasium and PettingZoo wrappers that can be applied to both standard NumPy or hardware accelerated Jax based environments, however this package can be used for many more things. 
 
 ## Installing JumPy
 
