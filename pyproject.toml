@@ -1,5 +1,5 @@
 [project]
-name = "brax-jumpy"
+name = "jax-jumpy"
 description = "Common backend for JAX or numpy."
 version = "0.0.2"
 authors = [
