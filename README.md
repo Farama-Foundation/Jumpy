@@ -1,4 +1,6 @@
-# JumPy
+<p align="center">
+    <img src="jumpy-text.png" width="500px"/>
+</p>
 
 JumPy is a common backend for [JAX](https://github.com/google/jax) or
 [NumPy](https://numpy.org/):
