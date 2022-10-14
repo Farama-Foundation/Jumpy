@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="jumpy-text.png" width="500px"/>
+    <img src="https://raw.githubusercontent.com/jjshoots/Jumpy/main/jumpy-text.png" width="500px"/>
 </p>
 
 Jumpy is a common backend for [JAX](https://github.com/google/jax) or
@@ -12,7 +12,7 @@ Jumpy is a common backend for [JAX](https://github.com/google/jax) or
 Jumpy lets you write framework agnostic code that is easy to debug by running
 as raw Numpy, but is just as performant as JAX when jitted.
 
-We maintain this repository primarily so to enable writing Gymnasium and PettingZoo wrappers that can be applied to both standard NumPy or hardware accelerated Jax based environments, however this package can be used for many more things. 
+We maintain this repository primarily so to enable writing Gymnasium and PettingZoo wrappers that can be applied to both standard NumPy or hardware accelerated Jax based environments, however this package can be used for many more things.
 
 ## Installing Jumpy
 
