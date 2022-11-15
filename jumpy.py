@@ -255,9 +255,9 @@ def tile(x: ndarray, reps: tuple[int, ...] | int) -> ndarray:
     return _which_np(x).tile(x, reps)
 
 
-def repeat(a: ndarray, repeats: int | ndarray) -> ndarray:
+def repeat(a: ndarray, repeats: int | ndarray, *args, **kwargs) -> ndarray:
     """Repeat elements of an array."""
-    return _which_np(a, repeats).repeat(a, repeats=repeats)
+    return _which_np(a, repeats).repeat(a, repeats=repeats, *args, **kwargs)
 
 
 def floor(x: ndarray) -> ndarray:
@@ -365,14 +365,14 @@ def maximum(x1: ndarray, x2: ndarray) -> ndarray:
     return _which_np(x1, x2).maximum(x1, x2)
 
 
-def amin(x: ndarray) -> ndarray:
+def amin(x: ndarray, *args, **kwargs) -> ndarray:
     """Returns the minimum along a given axis."""
-    return _which_np(x).amin(x)
+    return _which_np(x).amin(x, *args, **kwargs)
 
 
-def amax(x: ndarray) -> ndarray:
+def amax(x: ndarray, *args, **kwargs) -> ndarray:
     """Returns the maximum along a given axis."""
-    return _which_np(x).amax(x)
+    return _which_np(x).amax(x, *args, **kwargs)
 
 
 def argmin(x: ndarray, *args, **kwargs) -> ndarray:
