@@ -64,6 +64,9 @@ F = TypeVar("F", bound=Callable)
 
 def vmap(fun: F, include: Sequence[bool] | None = None) -> F:
     """Creates a function which maps ``fun`` over argument axes."""
+    if not _has_jax:
+        raise NotImplementedError("This function requires the jax module")
+
     if _in_jit():
         in_axes = 0
         if include:
@@ -116,6 +119,9 @@ def scan(
     unroll: int = 1,
 ) -> tuple[Carry, Y]:
     """Scan a function over leading array axes while carrying along state."""
+    if not _has_jax:
+        raise NotImplementedError("This function requires the jax module")
+
     if _in_jit():
         return jax.lax.scan(f, init, xs, length, reverse, unroll)
     else:
@@ -157,6 +163,9 @@ def fori_loop(lower: int, upper: int, body_fun: Callable[[X], X], init_val: X) -
 
 def take(tree: Any, i: ndarray | Sequence[int] | int, axis: int = 0) -> Any:
     """Returns tree sliced by i."""
+    if not _has_jax:
+        raise NotImplementedError("This function requires the jax module")
+
     np = _which_np(i)
     if isinstance(i, list) or isinstance(i, tuple):
         i = np.array(i, dtype=int)
