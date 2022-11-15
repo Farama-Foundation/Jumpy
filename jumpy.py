@@ -25,15 +25,19 @@ int32 = onp.int32
 
 
 def _in_jit() -> bool:
-    """Returns true if currently inside a jax.jit call."""
+    """Returns true if currently inside a jax.jit call or jit is disabled."""
+    if jax.config.jax_disable_jit:
+        return True
     return core.cur_sublevel().level > 0
 
 
 def _which_np(*args):
-    """Returns np or jnp depending on args."""
-    for a in args:
-        if isinstance(a, jnp.ndarray) and not isinstance(a, onp.ndarray):
-            return jnp
+    checker = lambda a: (
+        isinstance(a, (jnp.ndarray, jax.interpreters.batching.BatchTracer))
+        and not isinstance(a, onp.ndarray)
+    )
+    if builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
+        return jnp
     return onp
 
 
@@ -155,8 +159,8 @@ def norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
 
 def index_update(x: ndarray, idx: ndarray, y: ndarray) -> ndarray:
     """Pure equivalent of x[idx] = y."""
-    if _which_np(x) is jnp:
-        return x.at[idx].set(y)
+    if _which_np(x, idx, y) is jnp:
+        return jnp.array(x).at[idx].set(jnp.array(y))
     x = onp.copy(x)
     x[idx] = y
     return x
