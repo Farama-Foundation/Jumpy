@@ -1,19 +1,14 @@
-# pylint:disable=redefined-builtin
+"""Tests that random functions works."""
 
-
-import pytest
+import jax
 import numpy as onp
 from jax import numpy as jnp
-import jax
 
 import jumpy as jp
 
 
 def test_random_prngkey():
-    """
-    Tests whether `random_prngkey` returns different keys with 
-    different seeds
-    """
+    """Tests whether `random_prngkey` returns different keys with different seeds."""
     key1 = jp.random_prngkey(0)
     key2 = jp.random_prngkey(0)
     key3 = jp.random_prngkey(1)
@@ -23,10 +18,7 @@ def test_random_prngkey():
 
 
 def test_random_uniform():
-    """
-    Tests whether `random_uniform` returns different numbers given
-    different PRNG keys and with the correct return type
-    """
+    """Tests whether `random_uniform` returns different numbers given different PRNG keys and with the correct return type."""
     key1 = jp.random_prngkey(0)
     key2 = jax.random.PRNGKey(0)
 
@@ -43,10 +35,7 @@ def test_random_uniform():
 
 
 def test_random_split():
-    """
-    Tests whether `random_split` returns different keys wrt the 
-    originals and with the correct return type
-    """
+    """Tests whether `random_split` returns different keys wrt the originals and with the correct return type."""
     key1 = jp.random_prngkey(0)
     key2 = jax.random.PRNGKey(0)
     subkey1 = jp.random_split(key1)
