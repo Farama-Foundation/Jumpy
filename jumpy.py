@@ -7,7 +7,8 @@ Copyright is held by the authors
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Sequence, TypeVar, Union
+import builtins
+from typing import Any, Callable, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import jax
 import numpy as onp
@@ -24,15 +25,19 @@ int32 = onp.int32
 
 
 def _in_jit() -> bool:
-    """Returns true if currently inside a jax.jit call."""
+    """Returns true if currently inside a jax.jit call or jit is disabled."""
+    if jax.config.jax_disable_jit:
+        return True
     return core.cur_sublevel().level > 0
 
 
 def _which_np(*args):
-    """Returns np or jnp depending on args."""
-    for a in args:
-        if isinstance(a, jnp.ndarray) and not isinstance(a, onp.ndarray):
-            return jnp
+    checker = lambda a: (
+        isinstance(a, (jnp.ndarray, jax.interpreters.batching.BatchTracer))
+        and not isinstance(a, onp.ndarray)
+    )
+    if builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
+        return jnp
     return onp
 
 
@@ -109,10 +114,32 @@ def scan(
             xs_slice = [x[i] for x in xs_flat]
             carry, y = f(carry, jax.tree_util.tree_unflatten(xs_tree, xs_slice))
             ys.append(y)
-        stacked_y = jax.tree_util.tree_map(
-            lambda *y: onp.vstack(y), *maybe_reversed(ys)
-        )
+        stacked_y = jax.tree_util.tree_map(lambda *y: onp.stack(y), *maybe_reversed(ys))
         return carry, stacked_y
+
+
+def while_loop(
+    cond_fun: Callable[[X], Any], body_fun: Callable[[X], X], init_val: X
+) -> X:
+    """Call body_fun while cond_fun is true, starting with init_val."""
+    if _in_jit():
+        return jax.lax.while_loop(cond_fun, body_fun, init_val)
+    else:
+        val = init_val
+        while cond_fun(val):
+            val = body_fun(val)
+        return val
+
+
+def fori_loop(lower: int, upper: int, body_fun: Callable[[X], X], init_val: X) -> X:
+    """Call body_fun over range from lower to upper, starting with init_val."""
+    if _in_jit():
+        return jax.lax.fori_loop(lower, upper, body_fun, init_val)
+    else:
+        val = init_val
+        for _ in range(lower, upper):
+            val = body_fun(val)
+        return val
 
 
 def take(tree: Any, i: ndarray | Sequence[int] | int, axis: int = 0) -> Any:
@@ -130,8 +157,8 @@ def norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
 
 def index_update(x: ndarray, idx: ndarray, y: ndarray) -> ndarray:
     """Pure equivalent of x[idx] = y."""
-    if _which_np(x) is jnp:
-        return x.at[idx].set(y)
+    if _which_np(x, idx, y) is jnp:
+        return jnp.array(x).at[idx].set(jnp.array(y))
     x = onp.copy(x)
     x[idx] = y
     return x
@@ -160,6 +187,12 @@ def safe_norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
     else:
         n = onp.linalg.norm(x, axis=axis)
     return n
+
+
+def expand_dims(x: ndarray, axis: Union[Tuple[int, ...], int] = 0) -> ndarray:
+    """Increases batch dimensionality along axis."""
+
+    return _which_np(x).expand_dims(x, axis=axis)
 
 
 def any(a: ndarray, axis: int | None = None) -> ndarray:
@@ -207,6 +240,11 @@ def inv(a: ndarray) -> ndarray:
     return _which_np(a).linalg.inv(a)
 
 
+def roll(x: ndarray, shift, axis=None) -> ndarray:
+    """Rolls array elements along a given axis."""
+    return _which_np(x).roll(x, shift, axis=axis)
+
+
 def square(x: ndarray) -> ndarray:
     """Return the element-wise square of the input."""
     return _which_np(x).square(x)
@@ -217,9 +255,9 @@ def tile(x: ndarray, reps: tuple[int, ...] | int) -> ndarray:
     return _which_np(x).tile(x, reps)
 
 
-def repeat(a: ndarray, repeats: int | ndarray) -> ndarray:
+def repeat(a: ndarray, repeats: int | ndarray, *args, **kwargs) -> ndarray:
     """Repeat elements of an array."""
-    return _which_np(a, repeats).repeat(a, repeats=repeats)
+    return _which_np(a, repeats).repeat(a, repeats=repeats, *args, **kwargs)
 
 
 def floor(x: ndarray) -> ndarray:
@@ -247,6 +285,16 @@ def arctan2(x1: ndarray, x2: ndarray) -> ndarray:
     return _which_np(x1, x2).arctan2(x1, x2)
 
 
+def arctanh(x: ndarray) -> ndarray:
+    """Returns element-wise arctanh of x."""
+    return _which_np(x).arctanh(x)
+
+
+def tanh(x: ndarray) -> ndarray:
+    """Returns element-wise tanh of x."""
+    return _which_np(x).tanh(x)
+
+
 def arccos(x: ndarray) -> ndarray:
     """Trigonometric inverse cosine, element-wise."""
     return _which_np(x).arccos(x)
@@ -272,6 +320,21 @@ def arcsin(x: ndarray) -> ndarray:
     return _which_np(x).arcsin(x)
 
 
+@custom_jvp
+def safe_arcsin(x: ndarray) -> ndarray:
+    """Trigonometric inverse sine, element-wise with safety clipping in grad."""
+    return _which_np(x).arcsin(x)
+
+
+@safe_arcsin.defjvp
+def _safe_arcsin_jvp(primal, tangent):
+    (x,) = primal
+    (x_dot,) = tangent
+    primal_out = safe_arccos(x)
+    tangent_out = x_dot / sqrt(1.0 - clip(x, -1 + 1e-7, 1 - 1e-7) ** 2.0)
+    return primal_out, tangent_out
+
+
 def logical_not(x: ndarray) -> ndarray:
     """Returns the truth value of NOT x element-wise."""
     return _which_np(x).logical_not(x)
@@ -280,6 +343,11 @@ def logical_not(x: ndarray) -> ndarray:
 def logical_and(x1: ndarray, x2: ndarray) -> ndarray:
     """Returns the truth value of x1 AND x2 element-wise."""
     return _which_np(x1, x2).logical_and(x1, x2)
+
+
+def logical_or(x1: ndarray, x2: ndarray) -> ndarray:
+    """Returns the truth value of x1 OR x2 element-wise."""
+    return _which_np(x1, x2).logical_or(x1, x2)
 
 
 def multiply(x1: ndarray, x2: ndarray) -> ndarray:
@@ -292,14 +360,29 @@ def minimum(x1: ndarray, x2: ndarray) -> ndarray:
     return _which_np(x1, x2).minimum(x1, x2)
 
 
-def amin(x: ndarray) -> ndarray:
+def maximum(x1: ndarray, x2: ndarray) -> ndarray:
+    """Element-wise maximum of array elements."""
+    return _which_np(x1, x2).maximum(x1, x2)
+
+
+def amin(x: ndarray, *args, **kwargs) -> ndarray:
     """Returns the minimum along a given axis."""
-    return _which_np(x).amin(x)
+    return _which_np(x).amin(x, *args, **kwargs)
 
 
-def amax(x: ndarray) -> ndarray:
+def amax(x: ndarray, *args, **kwargs) -> ndarray:
     """Returns the maximum along a given axis."""
-    return _which_np(x).amax(x)
+    return _which_np(x).amax(x, *args, **kwargs)
+
+
+def argmin(x: ndarray, *args, **kwargs) -> ndarray:
+    """Returns the argmin along a given axis."""
+    return _which_np(x).argmin(x, *args, **kwargs)
+
+
+def argmax(x: ndarray, *args, **kwargs) -> ndarray:
+    """Returns the argmax along a given axis."""
+    return _which_np(x).argmax(x, *args, **kwargs)
 
 
 def exp(x: ndarray) -> ndarray:
@@ -348,6 +431,36 @@ def random_split(rng: ndarray, num: int = 2) -> ndarray:
         return rng.integers(low=0, high=2**32, dtype="uint32", size=(num, 2))
 
 
+def randint(
+    rng: ndarray,
+    shape: Tuple[int, ...] = (),
+    low: Optional[int] = 0,
+    high: Optional[int] = 1,
+) -> ndarray:
+    """Sample integers in [low, high) with given shape."""
+    if _which_np(rng) is jnp:
+        return jax.random.randint(rng, shape=shape, minval=low, maxval=high)
+    else:
+        return onp.random.default_rng(rng).integers(low=low, high=high, size=shape)
+
+
+def choice(
+    rng: ndarray,
+    a: Union[int, Any],
+    shape: Tuple[int, ...] = (),
+    replace: bool = True,
+    p: Optional[Any] = None,
+    axis: int = 0,
+) -> ndarray:
+    """Generate sample(s) from given array."""
+    if _which_np(rng) is jnp:
+        return jax.random.choice(rng, a, shape=shape, replace=replace, p=p, axis=axis)
+    else:
+        return onp.random.default_rng(rng).choice(
+            a, size=shape, replace=replace, p=p, axis=axis
+        )
+
+
 def segment_sum(
     data: ndarray, segment_ids: ndarray, num_segments: int | None = None
 ) -> ndarray:
@@ -391,6 +504,19 @@ def where(condition: ndarray, x: ndarray, y: ndarray) -> ndarray:
     return _which_np(condition, x, y).where(condition, x, y)
 
 
+def cond(
+    pred, true_fun: Callable[..., bool], false_fun: Callable[..., bool], *operands: Any
+):
+    """Conditionally apply true_fun or false_fun to operands."""
+    if _in_jit():
+        return jax.lax.cond(pred, true_fun, false_fun, *operands)
+    else:
+        if pred:
+            return true_fun(operands)
+        else:
+            return false_fun(operands)
+
+
 def diag(v: ndarray, k: int = 0) -> ndarray:
     """Extract a diagonal or construct a diagonal array."""
     return _which_np(v).diag(v, k)
@@ -431,6 +557,21 @@ def reshape(a: ndarray, newshape: tuple[int, ...] | int) -> ndarray:
     return _which_np(a).reshape(a, newshape)
 
 
+def atleast_1d(*arys) -> ndarray:
+    """Ensure arrays are all at least 1d (dimensions added to beginning)."""
+    return _which_np(*arys).atleast_1d(*arys)
+
+
+def atleast_2d(*arys) -> ndarray:
+    """Ensure arrays are all at least 2d (dimensions added to beginning)."""
+    return _which_np(*arys).atleast_2d(*arys)
+
+
+def atleast_3d(*arys) -> ndarray:
+    """Ensure arrays are all at least 3d (dimensions added to beginning)."""
+    return _which_np(*arys).atleast_3d(*arys)
+
+
 def array(object: Any, dtype=None) -> ndarray:
     """Creates an array given a list."""
     try:
@@ -443,3 +584,12 @@ def array(object: Any, dtype=None) -> ndarray:
 def abs(a: ndarray) -> ndarray:
     """Calculate the absolute value element-wise."""
     return _which_np(a).abs(a)
+
+
+def meshgrid(
+    *xi, copy: bool = True, sparse: bool = False, indexing: str = "xy"
+) -> ndarray:
+    """Create N-D coordinate matrices from 1D coordinate vectors."""
+    if _which_np(xi[0]) is jnp:
+        return jnp.meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
+    return onp.meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
