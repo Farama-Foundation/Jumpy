@@ -8,12 +8,13 @@ Copyright is held by the authors
 from __future__ import annotations
 
 import builtins
-from typing import Any, Callable, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Callable, Sequence, TypeVar, Union
 
 import jax
 import numpy as onp
 from jax import core, custom_jvp
 from jax import numpy as jnp
+from jax.interpreters.batching import BatchTracer
 
 ndarray = Union[onp.ndarray, jnp.ndarray]
 tree_map = jax.tree_util.tree_map  # works great with jax or numpy as-is
@@ -32,9 +33,8 @@ def _in_jit() -> bool:
 
 
 def _which_np(*args):
-    checker = lambda a: (
-        isinstance(a, (jnp.ndarray, jax.interpreters.batching.BatchTracer))
-        and not isinstance(a, onp.ndarray)
+    checker = lambda a: (  # noqa: E731
+        isinstance(a, (jnp.ndarray, BatchTracer)) and not isinstance(a, onp.ndarray)
     )
     if builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
         return jnp
@@ -189,9 +189,8 @@ def safe_norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
     return n
 
 
-def expand_dims(x: ndarray, axis: Union[Tuple[int, ...], int] = 0) -> ndarray:
+def expand_dims(x: ndarray, axis: tuple[int, ...] | int = 0) -> ndarray:
     """Increases batch dimensionality along axis."""
-
     return _which_np(x).expand_dims(x, axis=axis)
 
 
@@ -433,9 +432,9 @@ def random_split(rng: ndarray, num: int = 2) -> ndarray:
 
 def randint(
     rng: ndarray,
-    shape: Tuple[int, ...] = (),
-    low: Optional[int] = 0,
-    high: Optional[int] = 1,
+    shape: tuple[int, ...] = (),
+    low: int | None = 0,
+    high: int | None = 1,
 ) -> ndarray:
     """Sample integers in [low, high) with given shape."""
     if _which_np(rng) is jnp:
@@ -446,10 +445,10 @@ def randint(
 
 def choice(
     rng: ndarray,
-    a: Union[int, Any],
-    shape: Tuple[int, ...] = (),
+    a: int | Any,
+    shape: tuple[int, ...] = (),
     replace: bool = True,
-    p: Optional[Any] = None,
+    p: Any | None = None,
     axis: int = 0,
 ) -> ndarray:
     """Generate sample(s) from given array."""
