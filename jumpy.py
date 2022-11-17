@@ -10,8 +10,6 @@ from __future__ import annotations
 import builtins
 from typing import Any, Callable, Sequence, TypeVar, Union
 
-_has_jax = False
-
 import numpy as onp
 
 try:
@@ -28,6 +26,7 @@ except ImportError:
 
     jnp = None
     ndarray = onp.ndarray
+    _has_jax = False
 
 dtype = onp.dtype
 pi = onp.pi
