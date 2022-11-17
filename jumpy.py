@@ -10,14 +10,25 @@ from __future__ import annotations
 import builtins
 from typing import Any, Callable, Sequence, TypeVar, Union
 
-import jax
-import numpy as onp
-from jax import core, custom_jvp
-from jax import numpy as jnp
-from jax.interpreters.batching import BatchTracer
+_has_jax = False
 
-ndarray = Union[onp.ndarray, jnp.ndarray]
-tree_map = jax.tree_util.tree_map  # works great with jax or numpy as-is
+import numpy as onp
+
+try:
+    import jax
+    from jax import core, custom_jvp
+    from jax import numpy as jnp
+    from jax.interpreters.batching import BatchTracer
+
+    ndarray = Union[onp.ndarray, jnp.ndarray]
+    tree_map = jax.tree_util.tree_map  # works great with jax or numpy as-is
+    _has_jax = True
+except ImportError:
+    import numpy as jnp
+
+    jnp = None
+    ndarray = onp.ndarray
+
 dtype = onp.dtype
 pi = onp.pi
 inf = onp.inf
@@ -27,23 +38,25 @@ int32 = onp.int32
 
 def _in_jit() -> bool:
     """Returns true if currently inside a jax.jit call or jit is disabled."""
+    if not _has_jax:
+        return False
     if jax.config.jax_disable_jit:
         return True
     return core.cur_sublevel().level > 0
 
 
 def _which_np(*args):
-    checker = lambda a: (  # noqa: E731
+    checker = lambda a: (
         isinstance(a, (jnp.ndarray, BatchTracer)) and not isinstance(a, onp.ndarray)
     )
-    if builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
+    if _has_jax and builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
         return jnp
     return onp
 
 
 def _which_dtype(dtype):
     """Returns np or jnp depending on dtype."""
-    return jnp if dtype.__module__ == "jax.numpy" else onp
+    return jnp if _has_jax and dtype.__module__ == "jax.numpy" else onp
 
 
 F = TypeVar("F", bound=Callable)
