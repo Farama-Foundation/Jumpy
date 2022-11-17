@@ -46,7 +46,7 @@ def _in_jit() -> bool:
 
 
 def _which_np(*args):
-    checker = lambda a: (
+    checker = lambda a: (  # noqa: E731
         isinstance(a, (jnp.ndarray, BatchTracer)) and not isinstance(a, onp.ndarray)
     )
     if _has_jax and builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
