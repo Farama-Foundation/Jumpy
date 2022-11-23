@@ -14,6 +14,7 @@ import jumpy as jp
         (jp.array([5, 9, 7, 1, 2]), 3, ([9, 7, 5], [1, 2, 0])),
         # Jax array
         (jp.array([5, 7, 1, 2], dtype=jnp.int32), 2, ([7, 5], [1, 0])),
+        (jp.array([5, 9, 7, 1, 2], dtype=jnp.int32), 3, ([9, 7, 5], [1, 2, 0])),
     ],
 )
 def test_top_k(x, k, ret):
