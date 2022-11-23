@@ -81,6 +81,7 @@ def test_random_funcs():
     assert np.all(0 <= x) and np.all(x <= 5) and x.shape == (2,)
 
 
+@pytest.mark.skipif(jp._has_jax is True, reason="This test requires that jax is not installed.")
 @pytest.mark.parametrize(
     "func_name, kwargs",
     (

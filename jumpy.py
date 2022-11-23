@@ -534,8 +534,9 @@ def top_k(operand: ndarray, k: int) -> tuple[ndarray, ndarray]:
     if _which_np(operand) is jnp:
         return jax.lax.top_k(operand, k)
     else:
-        ind = onp.argpartition(operand, -k)[-k:]
-        return operand[ind], ind
+        top_ind = onp.argpartition(operand, -k)[-k:]
+        sorted_ind = top_ind[onp.argsort(-operand[top_ind])]
+        return operand[sorted_ind], sorted_ind
 
 
 def stack(x: list[ndarray], axis=0) -> ndarray:
