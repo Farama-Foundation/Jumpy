@@ -20,12 +20,27 @@ try:
 
     ndarray = Union[onp.ndarray, jnp.ndarray]
     tree_map = jax.tree_util.tree_map  # works great with jax or numpy as-is
+
     _has_jax = True
 except ImportError:
-    import numpy as jnp
+    jax, core, jnp, BatchTracer = None, None, None, None
 
-    jnp = None
     ndarray = onp.ndarray
+
+    class custom_jvp:
+        """Custom JVP decorator."""
+
+        def __init__(self, func: callable):
+            """Initialise the custom jvp with func."""
+            self.func = func
+
+        def __call__(self, *args, **kwargs):
+            """Calls the func with `args` and `kwargs`."""
+            return self.func(*args, **kwargs)
+
+        def defjvp(self, func):
+            """For numpy only, we ignore the defjvp function."""
+
     _has_jax = False
 
 dtype = onp.dtype
@@ -37,25 +52,32 @@ int32 = onp.int32
 
 def _in_jit() -> bool:
     """Returns true if currently inside a jax.jit call or jit is disabled."""
-    if not _has_jax:
+    if _has_jax is False:
         return False
-    if jax.config.jax_disable_jit:
+    elif jax.config.jax_disable_jit:
         return True
-    return core.cur_sublevel().level > 0
+    else:
+        return core.cur_sublevel().level > 0
 
 
-def _which_np(*args):
+def _which_np(*args: Any):
+    if _has_jax is False:
+        return onp
+
     checker = lambda a: (  # noqa: E731
         isinstance(a, (jnp.ndarray, BatchTracer)) and not isinstance(a, onp.ndarray)
     )
-    if _has_jax and builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
+    if builtins.any(jax.tree_util.tree_leaves(tree_map(checker, args))):
         return jnp
     return onp
 
 
-def _which_dtype(dtype):
+def _which_dtype(dtype: object | None):
     """Returns np or jnp depending on dtype."""
-    return jnp if _has_jax and dtype.__module__ == "jax.numpy" else onp
+    if _has_jax and dtype is not None and dtype.__module__ == "jax.numpy":
+        return jnp
+    else:
+        return onp
 
 
 F = TypeVar("F", bound=Callable)
@@ -166,9 +188,19 @@ def take(tree: Any, i: ndarray | Sequence[int] | int, axis: int = 0) -> Any:
         raise NotImplementedError("This function requires the jax module")
 
     np = _which_np(i)
-    if isinstance(i, list) or isinstance(i, tuple):
+    if isinstance(i, (list, tuple)):
         i = np.array(i, dtype=int)
     return jax.tree_util.tree_map(lambda x: np.take(x, i, axis=axis, mode="clip"), tree)
+
+
+def index_update(x: ndarray, idx: ndarray, y: ndarray) -> ndarray:
+    """Pure equivalent of x[idx] = y."""
+    if _which_np(x, idx, y) is jnp:
+        return jnp.array(x).at[idx].set(jnp.array(y))
+    else:
+        x = onp.copy(x)
+        x[idx] = y
+        return x
 
 
 def norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
@@ -176,23 +208,14 @@ def norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
     return _which_np(x, axis).linalg.norm(x, axis=axis)
 
 
-def index_update(x: ndarray, idx: ndarray, y: ndarray) -> ndarray:
-    """Pure equivalent of x[idx] = y."""
-    if _which_np(x, idx, y) is jnp:
-        return jnp.array(x).at[idx].set(jnp.array(y))
-    x = onp.copy(x)
-    x[idx] = y
-    return x
-
-
 def safe_norm(x: ndarray, axis: tuple[int, ...] | int | None = None) -> ndarray:
     """Calculates a linalg.norm(x) that's safe for gradients at x=0.
 
-    Avoids a poorly defined gradient for jnp.linal.norm(0) see
+    Avoids a poorly defined gradient for jnp.linalg.norm(0) see
     https://github.com/google/jax/issues/3058 for details
 
     Args:
-      x: A jnp.array
+      x: A jp.ndarray
       axis: The axis along which to compute the norm
 
     Returns:
@@ -235,9 +258,20 @@ def var(a: ndarray, axis: int | None = None) -> ndarray:
     return _which_np(a).var(a, axis=axis)
 
 
-def arange(start: int, stop: int, dtype=float) -> ndarray:
+def arange(start: int, stop: int, dtype=None) -> ndarray:
     """Return evenly spaced values within a given interval."""
-    return _which_dtype(dtype).arange(start, stop, dtype=dtype)
+    if dtype is None:
+        return _which_np(start, stop).arange(start, stop, dtype=dtype)
+    else:
+        return _which_dtype(dtype).arange(start, stop, dtype=dtype)
+
+
+def linspace(start: ndarray, stop: ndarray, num: int, dtype=None) -> ndarray:
+    """Return evenly spaced `num` values between `start` and `stop`."""
+    if dtype is None:
+        return _which_np(start, stop, num).linspace(start, stop, num)
+    else:
+        return _which_dtype(dtype).linspace(start, stop, num, dtype=dtype)
 
 
 def dot(x: ndarray, y: ndarray) -> ndarray:
@@ -271,7 +305,7 @@ def square(x: ndarray) -> ndarray:
 
 
 def tile(x: ndarray, reps: tuple[int, ...] | int) -> ndarray:
-    """Construct an array by repeating A the number of times given by reps."""
+    """Construct an array by repeating `x` the number of times given by reps."""
     return _which_np(x).tile(x, reps)
 
 
@@ -466,7 +500,7 @@ def randint(
 
 def choice(
     rng: ndarray,
-    a: int | Any,
+    a: int | ndarray,
     shape: tuple[int, ...] = (),
     replace: bool = True,
     p: Any | None = None,
@@ -594,10 +628,14 @@ def atleast_3d(*arys) -> ndarray:
 
 def array(object: Any, dtype=None) -> ndarray:
     """Creates an array given a list."""
-    try:
-        np = _which_np(*object)
-    except TypeError:
-        np = _which_np(object)  # object is not iterable (e.g. primitive type)
+    if dtype is None:
+        try:
+            np = _which_np(*object)
+        except TypeError:
+            np = _which_np(object)  # object is not iterable (e.g. primitive type)
+    else:
+        np = _which_dtype(dtype)
+
     return np.array(object, dtype)
 
 
