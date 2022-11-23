@@ -77,7 +77,7 @@ def _which_dtype(dtype: object | None):
     if (
         _has_jax
         and dtype is not None
-        and dtype.__module__ == "jax._src.numpy.lax_numpy"
+        and dtype.__module__ == "jax.numpy"
     ):
         return jnp
     else:
