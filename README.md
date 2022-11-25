@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Farama-Foundation/Jumpy/tree/main/.github/jumpy-text.png" width="500px"/>
+    <img src="https://raw.githubusercontent.com/Farama-Foundation/Jumpy/main/.github/jumpy-text.png" width="500px"/>
 </p>
 
 Jumpy is a common backend for [NumPy](https://numpy.org/) and optionally [JAX](https://github.com/google/jax):
