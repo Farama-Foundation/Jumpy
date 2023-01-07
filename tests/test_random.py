@@ -9,9 +9,9 @@ import jumpy as jp
 
 def test_random_prngkey():
     """Tests whether `random_prngkey` returns different keys with different seeds."""
-    key1 = jp.random_prngkey(0)
-    key2 = jp.random_prngkey(0)
-    key3 = jp.random_prngkey(1)
+    key1 = jp.random.PRNGKey(0)
+    key2 = jp.random.PRNGKey(0)
+    key3 = jp.random.PRNGKey(1)
 
     assert onp.array_equal(key1, key2)
     assert not onp.array_equal(key2, key3)
@@ -19,13 +19,13 @@ def test_random_prngkey():
 
 def test_random_uniform():
     """Tests whether `random_uniform` returns different numbers given different PRNG keys and with the correct return type."""
-    key1 = jp.random_prngkey(0)
+    key1 = jp.random.PRNGKey(0)
     key2 = jax.random.PRNGKey(0)
 
-    val1 = jp.random_uniform(key1)
-    val2 = jp.random_uniform(key1)
-    val3 = jp.random_uniform(key2)
-    val4 = jp.random_uniform(key2)
+    val1 = jp.random.uniform(key1)
+    val2 = jp.random.uniform(key1)
+    val3 = jp.random.uniform(key2)
+    val4 = jp.random.uniform(key2)
 
     assert isinstance(val1, onp.ndarray)
     assert isinstance(val3, jnp.ndarray)
@@ -36,10 +36,10 @@ def test_random_uniform():
 
 def test_random_split():
     """Tests whether `random_split` returns different keys wrt the originals and with the correct return type."""
-    key1 = jp.random_prngkey(0)
+    key1 = jp.random.PRNGKey(0)
     key2 = jax.random.PRNGKey(0)
-    subkey1 = jp.random_split(key1)
-    subkey2 = jp.random_split(key2)
+    subkey1 = jp.random.split(key1)
+    subkey2 = jp.random.split(key2)
 
     assert isinstance(subkey1, onp.ndarray)
     assert isinstance(subkey2, jnp.ndarray)

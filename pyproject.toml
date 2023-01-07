@@ -1,9 +1,9 @@
 [project]
 name = "jax-jumpy"
 description = "Common backend for JAX or numpy."
-version = "0.2.0"
+version = "1.0.0"
 authors = [
-    { name = "Farama Foundation", email = "jkterry@farama.org" }
+    { name = "Farama Foundation", email = "contact@farama.org" }
 ]
 readme = "README.md"
 license_file = { file="LICENSE" }

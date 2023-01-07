@@ -23,7 +23,7 @@ import jumpy as jp
 def test_norm(x, axis):
     """Checks equivalence in jax and numpy arrays."""
     x = jnp.array(x)
-    norm = jp.safe_norm(x, axis=axis)
+    norm = jp.linalg.safe_norm(x, axis=axis)
 
     if isinstance(norm, jnp.ndarray):
         assert onp.array_equal(norm, jnp.linalg.norm(x, axis=axis))
@@ -55,6 +55,6 @@ def test_norm(x, axis):
 )
 def test_gradient(x, axis, res):
     """Tests the gradient of the `safe_norm` function."""
-    fun = grad(lambda x: jp.safe_norm(x, axis=axis))
+    fun = grad(lambda x: jp.linalg.safe_norm(x, axis=axis))
 
     assert onp.array_equal(fun(x), res)

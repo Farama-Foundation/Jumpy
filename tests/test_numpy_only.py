@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 import jumpy as jp
-from jumpy import _which_dtype, _which_np
+from jumpy._core import which_dtype, which_np
 
 
 @pytest.mark.parametrize(
@@ -12,13 +12,13 @@ from jumpy import _which_dtype, _which_np
 )
 def test_which_np(args):
     """Test the jp._which_np function."""
-    assert _which_np(*args) is np
+    assert which_np(*args) is np
 
 
 @pytest.mark.parametrize("dtype", (int, float, np.int32, np.uint8))
 def test_which_dtype(dtype):
     """Test the jp._which_dtype function."""
-    assert _which_dtype(dtype) is np
+    assert which_dtype(dtype) is np
 
 
 @pytest.mark.parametrize(
@@ -42,8 +42,8 @@ def test_safe_func(safe_func_name, func_name, args):
 )
 def test_safe_norm(x, axis):
     """Test the jp.safe_norm function."""
-    safe_norm = jp.safe_norm(x, axis)
-    jp_norm = jp.norm(x, axis)
+    safe_norm = jp.linalg.safe_norm(x, axis)
+    jp_norm = jp.linalg.norm(x, axis)
     np_norm = np.linalg.norm(x, axis=axis)
 
     assert type(safe_norm) is type(jp_norm) is type(np_norm)
@@ -57,7 +57,7 @@ def test_safe_norm(x, axis):
 )
 def test_np_linalg_func(func_name, args):
     """Test the np.linalg functions."""
-    jp_out = getattr(jp, func_name)(args)
+    jp_out = getattr(jp.linalg, func_name)(args)
     np_out = getattr(np.linalg, func_name)(args)
 
     assert type(jp_out) is type(np_out)
@@ -66,23 +66,23 @@ def test_np_linalg_func(func_name, args):
 
 def test_random_funcs():
     """Test all jumpy random functions."""
-    rng = jp.random_prngkey(seed=123)
-    rng, rng_1, rng_2, rng_3 = jp.random_split(rng, num=4)
+    rng = jp.random.PRNGKey(seed=123)
+    rng, rng_1, rng_2, rng_3 = jp.random.split(rng, num=4)
 
-    x = jp.random_uniform(rng)
+    x = jp.random.uniform(rng)
     assert 0 <= x <= 1
-    x = jp.random_uniform(rng_1, (2,), low=1, high=2)
+    x = jp.random.uniform(rng_1, (2,), low=1, high=2)
     assert np.all(1 <= x) and np.all(x <= 2) and x.shape == (2,)
 
-    x = jp.randint(rng_2, (2,), low=2, high=10)
+    x = jp.random.randint(rng_2, (2,), low=2, high=10)
     assert np.all(2 <= x) and np.all(x <= 10) and x.shape == (2,)
 
-    x = jp.choice(rng_3, 5, shape=(2,))
+    x = jp.random.choice(rng_3, 5, shape=(2,))
     assert np.all(0 <= x) and np.all(x <= 5) and x.shape == (2,)
 
 
 @pytest.mark.skipif(
-    jp._has_jax is True, reason="This test requires that jax is not installed."
+    jp.is_jax_installed is True, reason="This test requires that jax is not installed."
 )
 @pytest.mark.parametrize(
     "func_name, kwargs",

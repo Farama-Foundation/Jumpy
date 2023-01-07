@@ -26,8 +26,8 @@ def test_norm():
     A = onp.array([1, 2, 3])
     B = jnp.array([1, 2, 3])
 
-    jp.norm(A)
-    jp.norm(B)
+    jp.linalg.norm(A)
+    jp.linalg.norm(B)
 
 
 def test_any():
@@ -120,8 +120,8 @@ def test_inv():
     A = onp.arange(4).reshape((2, 2))
     B = jnp.arange(4).reshape((2, 2))
 
-    _check_types(A, jp.inv(A))
-    _check_types(B, jp.inv(B))
+    _check_types(A, jp.linalg.inv(A))
+    _check_types(B, jp.linalg.inv(B))
 
 
 def test_square():
