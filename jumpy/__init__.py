@@ -22,7 +22,7 @@ except ImportError:
     is_jax_installed = False
 
 
-from jumpy._core import is_in_jit, which_dtype, which_np  # isort:skip
+from jumpy.core import is_in_jit, which_dtype, which_np  # isort:skip
 from jumpy import linalg, random
 from jumpy._create_data import (
     arange,

@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 import jumpy as jp
-from jumpy._core import which_dtype, which_np
+from jumpy.core import which_dtype, which_np
 
 
 @pytest.mark.parametrize(

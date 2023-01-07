@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Sequence
 
 from jumpy import ndarray, which_np
-from jumpy._core import custom_jvp
+from jumpy.core import custom_jvp
 
 
 def abs(a: ndarray) -> ndarray:
