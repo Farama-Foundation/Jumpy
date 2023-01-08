@@ -4,12 +4,17 @@ from __future__ import annotations
 
 from typing import Any, Callable, Sequence, TypeVar
 
-import jax
-import jax.numpy as jnp
 import numpy as onp
 
 from jumpy import is_jax_installed, ndarray
 from jumpy.core import is_jitted, which_dtype, which_np
+
+try:
+    import jax
+    import jax.numpy as jnp
+except ImportError:
+    jax, jnp = None, None
+
 
 F = TypeVar("F", bound=Callable)
 

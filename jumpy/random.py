@@ -3,12 +3,17 @@ from __future__ import annotations
 
 from typing import Any
 
-import jax
-import jax.numpy as jnp
 import numpy as onp
 
 from jumpy import ndarray
 from jumpy.core import which_np
+
+try:
+    import jax
+    import jax.numpy as jnp
+except ImportError:
+    jax, jnp = None, None
+
 
 __all__ = [
     "PRNGKey",

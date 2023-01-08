@@ -16,12 +16,12 @@ __all__ = [
     "custom_jvp",
 ]
 
-if jp.is_jax_installed:
+try:
     import jax
     import jax.numpy as jnp
     from jax import custom_jvp, tree_map
     from jax.interpreters.batching import BatchTracer
-else:
+except ImportError:
     jax, jnp = None, None
 
     BatchTracer = None
