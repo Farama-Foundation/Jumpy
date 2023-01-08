@@ -5,7 +5,8 @@ from __future__ import annotations
 import jax.numpy as jnp
 import numpy as onp
 
-from jumpy import ndarray, which_np
+from jumpy import ndarray
+from jumpy.core import which_np
 
 __all__ = ["inv", "norm", "safe_norm"]
 

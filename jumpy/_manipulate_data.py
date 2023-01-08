@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from jumpy import ndarray, which_np
-from jumpy.core import custom_jvp
+from jumpy import ndarray
+from jumpy.core import custom_jvp, which_np
 
 
 def abs(a: ndarray) -> ndarray:

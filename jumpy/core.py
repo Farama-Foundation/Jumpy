@@ -10,7 +10,7 @@ import numpy as onp
 import jumpy as jp
 
 __all__ = [
-    "is_in_jit",
+    "is_jitted",
     "which_np",
     "which_dtype",
     "custom_jvp",
@@ -42,7 +42,7 @@ else:
             """For numpy only, we ignore the defjvp function."""
 
 
-def is_in_jit() -> bool:
+def is_jitted() -> bool:
     """Returns true if currently inside a jax.jit call or jit is disabled."""
     if jp.is_jax_installed is False:
         return False

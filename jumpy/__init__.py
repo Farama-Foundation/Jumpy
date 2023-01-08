@@ -22,7 +22,6 @@ except ImportError:
     is_jax_installed = False
 
 
-from jumpy.core import is_in_jit, which_dtype, which_np  # isort:skip
 from jumpy import linalg, random
 from jumpy._create_data import (
     arange,
@@ -108,10 +107,6 @@ __all__ = [
     "random",
     "linalg",
     # "fft", not implemented yet
-    # === core functions ===
-    "is_in_jit",
-    "which_np",
-    "which_dtype",
     # === create data functions ===
     "arange",
     "atleast_1d",

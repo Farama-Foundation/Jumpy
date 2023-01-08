@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from jumpy import ndarray, which_dtype, which_np
+from jumpy import ndarray
+from jumpy.core import which_dtype, which_np
 
 
 def arange(start: int, stop: int, dtype=None) -> ndarray:

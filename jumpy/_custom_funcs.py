@@ -8,7 +8,8 @@ import jax
 import jax.numpy as jnp
 import numpy as onp
 
-from jumpy import is_in_jit, is_jax_installed, ndarray, which_dtype, which_np
+from jumpy import is_jax_installed, ndarray
+from jumpy.core import is_jitted, which_dtype, which_np
 
 F = TypeVar("F", bound=Callable)
 
@@ -34,7 +35,7 @@ def cond(
     pred, true_fun: Callable[..., bool], false_fun: Callable[..., bool], *operands: Any
 ):
     """Conditionally apply true_fun or false_fun to operands."""
-    if is_in_jit():
+    if is_jitted():
         return jax.lax.cond(pred, true_fun, false_fun, *operands)
     else:
         if pred:
@@ -45,7 +46,7 @@ def cond(
 
 def fori_loop(lower: int, upper: int, body_fun: Callable[[X], X], init_val: X) -> X:
     """Call body_fun over range from lower to upper, starting with init_val."""
-    if is_in_jit():
+    if is_jitted():
         return jax.lax.fori_loop(lower, upper, body_fun, init_val)
     else:
         val = init_val
@@ -86,7 +87,7 @@ def scan(
     if not is_jax_installed:
         raise NotImplementedError("This function requires the jax module")
 
-    if is_in_jit():
+    if is_jitted():
         return jax.lax.scan(f, init, xs, length, reverse, unroll)
     else:
         xs_flat, xs_tree = jax.tree_util.tree_flatten(xs)
@@ -141,7 +142,7 @@ def vmap(fun: F, include: Sequence[bool] | None = None) -> F:
     if not is_jax_installed:
         raise NotImplementedError("This function requires the jax module")
 
-    if is_in_jit():
+    if is_jitted():
         in_axes = 0
         if include:
             in_axes = [0 if inc else None for inc in include]
@@ -183,7 +184,7 @@ def while_loop(
     cond_fun: Callable[[X], Any], body_fun: Callable[[X], X], init_val: X
 ) -> X:
     """Call body_fun while cond_fun is true, starting with init_val."""
-    if is_in_jit():
+    if is_jitted():
         return jax.lax.while_loop(cond_fun, body_fun, init_val)
     else:
         val = init_val
