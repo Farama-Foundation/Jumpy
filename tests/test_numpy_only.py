@@ -100,9 +100,7 @@ def test_jax_only_funcs(func_name, kwargs):
 
 @pytest.mark.parametrize(
     "func_name, kwargs, expected",
-    (
-        ("index_update", {"x": np.array([0, 1]), "idx": 0, "y": 2}, np.array([2, 1])),
-    ),
+    (("index_update", {"x": np.array([0, 1]), "idx": 0, "y": 2}, np.array([2, 1])),),
 )
 def test_custom_np_func(func_name, kwargs, expected):
     """Test the implementation of custom np functions."""
@@ -117,26 +115,26 @@ def test_custom_np_func(func_name, kwargs, expected):
 @pytest.mark.parametrize(
     "func_name, kwargs, expected",
     (
-            (
-                    "while_loop",
-                    {"cond_fun": lambda x: x < 4, "body_fun": lambda x: x + 1, "init_val": 0},
-                    4,
-            ),
-            (
-                    "fori_loop",
-                    {
-                        "lower": 0,
-                        "upper": 4,
-                        "body_fun": lambda x: x + [len(x)],
-                        "init_val": [],
-                    },
-                    [0, 1, 2, 3],
-            ),
-            (
-                    "top_k",
-                    {"operand": np.array([1, 2, 4, 3, 6]), "k": 2},
-                    (np.array([6, 4]), np.array([4, 2])),
-            ),
+        (
+            "while_loop",
+            {"cond_fun": lambda x: x < 4, "body_fun": lambda x: x + 1, "init_val": 0},
+            4,
+        ),
+        (
+            "fori_loop",
+            {
+                "lower": 0,
+                "upper": 4,
+                "body_fun": lambda x: x + [len(x)],
+                "init_val": [],
+            },
+            [0, 1, 2, 3],
+        ),
+        (
+            "top_k",
+            {"operand": np.array([1, 2, 4, 3, 6]), "k": 2},
+            (np.array([6, 4]), np.array([4, 2])),
+        ),
     ),
 )
 def test_custom_np_lax_func(func_name, kwargs, expected):

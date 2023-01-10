@@ -22,14 +22,8 @@ except ImportError:
     is_jax_installed = False
 
 
-from jumpy import linalg, random, lax, ops
-from jumpy._custom_fns import (
-    array,
-    index_update,
-    meshgrid,
-    take,
-    vmap,
-)
+from jumpy import lax, linalg, ops, random
+from jumpy._custom_fns import array, index_update, meshgrid, take, vmap
 from jumpy._factory_fns import (
     arange,
     atleast_1d,
