@@ -24,14 +24,14 @@ def test_array(array, length):
         return x, y * x
 
     carry1, y1 = jax.lax.scan(fun, 0, array, length=length)
-    carry2, y2 = jp.scan(fun, 0, array, length=length)
+    carry2, y2 = jp.lax.scan(fun, 0, array, length=length)
 
     assert onp.array_equal(carry1, carry2)
     assert onp.array_equal(y1, y2)
 
     # Reversed
     carry1, y1 = jax.lax.scan(fun, 0, array, length=length, reverse=True)
-    carry2, y2 = jp.scan(fun, 0, array, length=length, reverse=True)
+    carry2, y2 = jp.lax.scan(fun, 0, array, length=length, reverse=True)
 
     assert onp.array_equal(carry1, carry2)
     assert onp.array_equal(y1, y2)
@@ -60,7 +60,7 @@ def test_dict(dict, length):
         return x, ret
 
     carry1, y1 = jax.lax.scan(fun, 0, dict, length=length)
-    carry2, y2 = jp.scan(fun, 0, dict, length=length)
+    carry2, y2 = jp.lax.scan(fun, 0, dict, length=length)
 
     assert onp.array_equal(carry1, carry2)
     assert all(onp.array_equal(y1[key], y2[key]) for key in y1)

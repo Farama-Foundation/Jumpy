@@ -26,4 +26,4 @@ import jumpy as jp
 )
 def test_segment_sum(data, segment_ids, ret):
     """Checks if the result of `segment_sum` on the given inputs equals the expected output."""
-    assert onp.array_equal(jp.segment_sum(data, segment_ids), ret)
+    assert onp.array_equal(jp.ops.segment_sum(data, segment_ids), ret)

@@ -19,7 +19,7 @@ import jumpy as jp
 )
 def test_top_k(x, k, ret):
     """Checks if the result of `top_k` on the given inputs equals the expected output."""
-    top, indices = jp.top_k(x, k)
+    top, indices = jp.lax.top_k(x, k)
     assert len(top) == len(indices) == len(ret[0]) == len(ret[1])
     assert onp.array_equal(top, ret[0])
     # Checks that the index values in x are equal to the top values.

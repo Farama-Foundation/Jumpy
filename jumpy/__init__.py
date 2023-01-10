@@ -22,8 +22,15 @@ except ImportError:
     is_jax_installed = False
 
 
-from jumpy import linalg, random
-from jumpy._create_data import (
+from jumpy import linalg, random, lax, ops
+from jumpy._custom_fns import (
+    array,
+    index_update,
+    meshgrid,
+    take,
+    vmap,
+)
+from jumpy._factory_fns import (
     arange,
     atleast_1d,
     atleast_2d,
@@ -36,20 +43,7 @@ from jumpy._create_data import (
     zeros,
     zeros_like,
 )
-from jumpy._custom_funcs import (
-    array,
-    cond,
-    fori_loop,
-    index_update,
-    meshgrid,
-    scan,
-    segment_sum,
-    take,
-    top_k,
-    vmap,
-    while_loop,
-)
-from jumpy._manipulate_data import (
+from jumpy._transform_data import (
     abs,
     all,
     amax,
@@ -106,6 +100,8 @@ __all__ = [
     # === sub-modules ===
     "random",
     "linalg",
+    "lax",
+    "ops",
     # "fft", not implemented yet
     # === create data functions ===
     "arange",
@@ -121,16 +117,10 @@ __all__ = [
     "zeros_like",
     # === custom functions ==
     "array",
-    "cond",
-    "fori_loop",
     "index_update",
     "meshgrid",
-    "scan",
-    "segment_sum",
     "take",
-    "top_k",
     "vmap",
-    "while_loop",
     # === manipulation data functions ===
     "abs",
     "all",

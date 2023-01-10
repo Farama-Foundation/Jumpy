@@ -101,32 +101,7 @@ def test_jax_only_funcs(func_name, kwargs):
 @pytest.mark.parametrize(
     "func_name, kwargs, expected",
     (
-        (
-            "while_loop",
-            {"cond_fun": lambda x: x < 4, "body_fun": lambda x: x + 1, "init_val": 0},
-            4,
-        ),
-        (
-            "fori_loop",
-            {
-                "lower": 0,
-                "upper": 4,
-                "body_fun": lambda x: x + [len(x)],
-                "init_val": [],
-            },
-            [0, 1, 2, 3],
-        ),
         ("index_update", {"x": np.array([0, 1]), "idx": 0, "y": 2}, np.array([2, 1])),
-        (
-            "segment_sum",
-            {"data": np.arange(5), "segment_ids": np.array([0, 0, 1, 1, 2])},
-            np.array([1, 5, 4]),
-        ),
-        (
-            "top_k",
-            {"operand": np.array([1, 2, 4, 3, 6]), "k": 2},
-            (np.array([6, 4]), np.array([4, 2])),
-        ),
     ),
 )
 def test_custom_np_func(func_name, kwargs, expected):
@@ -139,9 +114,64 @@ def test_custom_np_func(func_name, kwargs, expected):
         assert np.all(out == expected)
 
 
+@pytest.mark.parametrize(
+    "func_name, kwargs, expected",
+    (
+            (
+                    "while_loop",
+                    {"cond_fun": lambda x: x < 4, "body_fun": lambda x: x + 1, "init_val": 0},
+                    4,
+            ),
+            (
+                    "fori_loop",
+                    {
+                        "lower": 0,
+                        "upper": 4,
+                        "body_fun": lambda x: x + [len(x)],
+                        "init_val": [],
+                    },
+                    [0, 1, 2, 3],
+            ),
+            (
+                    "top_k",
+                    {"operand": np.array([1, 2, 4, 3, 6]), "k": 2},
+                    (np.array([6, 4]), np.array([4, 2])),
+            ),
+    ),
+)
+def test_custom_np_lax_func(func_name, kwargs, expected):
+    """Test the implementation of custom np functions."""
+    out = getattr(jp.lax, func_name)(**kwargs)
+
+    if isinstance(out, tuple):
+        assert all(np.all(a == b) for a, b in zip(out, expected))
+    else:
+        assert np.all(out == expected)
+
+
+@pytest.mark.parametrize(
+    "func_name, kwargs, expected",
+    (
+        (
+            "segment_sum",
+            {"data": np.arange(5), "segment_ids": np.array([0, 0, 1, 1, 2])},
+            np.array([1, 5, 4]),
+        ),
+    ),
+)
+def test_custom_np_ops_func(func_name, kwargs, expected):
+    """Test the implementation of custom np functions."""
+    out = getattr(jp.ops, func_name)(**kwargs)
+
+    if isinstance(out, tuple):
+        assert all(np.all(a == b) for a, b in zip(out, expected))
+    else:
+        assert np.all(out == expected)
+
+
 def test_meshgrid_cond():
     """Test that meshgrid and cond work as use `*operands` this doesn't work with `test_custom_np_func`."""
-    out = jp.cond(True, lambda x: x[0] + 1, lambda x: x[0] - 1, 5)
+    out = jp.lax.cond(True, lambda x: x[0] + 1, lambda x: x[0] - 1, 5)
     expected_out = 6
     assert out == expected_out
 
