@@ -96,7 +96,6 @@ def test_jax_only_funcs():
         jp.take(tree=jp.array([0, 1, 2]), i=1)
 
 
-
 @pytest.mark.parametrize(
     "func_name, kwargs, expected",
     (("index_update", {"x": np.array([0, 1]), "idx": 0, "y": 2}, np.array([2, 1])),),
