@@ -84,18 +84,17 @@ def test_random_funcs():
 @pytest.mark.skipif(
     jp.is_jax_installed is True, reason="This test requires that jax is not installed."
 )
-@pytest.mark.parametrize(
-    "func_name, kwargs",
-    (
-        ("vmap", {"fun": lambda x: x + 1}),
-        ("scan", {"f": lambda a, b: (b, a + b), "init": 0, "xs": [0, 1, 2]}),
-        ("take", {"tree": np.array([0, 1, 2]), "i": 1}),
-    ),
-)
-def test_jax_only_funcs(func_name, kwargs):
+def test_jax_only_funcs():
     """Test jax-only functions."""
     with pytest.raises(NotImplementedError):
-        getattr(jp, func_name)(**kwargs)
+        jp.vmap(lambda x: x + 1)
+
+    with pytest.raises(NotImplementedError):
+        jp.lax.scan(lambda a, b: (b, a + b), init=0, xs=[0, 1, 2])
+
+    with pytest.raises(NotImplementedError):
+        jp.take(tree=jp.array([0, 1, 2]), i=1)
+
 
 
 @pytest.mark.parametrize(
