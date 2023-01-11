@@ -1,13 +1,14 @@
-"""Custom implemented functions."""
+"""Core implemented functions."""
 
 from __future__ import annotations
 
-from typing import Any, Callable, Sequence, TypeVar
+from typing import Callable, Sequence, TypeVar
 
 import numpy as onp
 
 from jumpy import is_jax_installed, ndarray
-from jumpy.core import is_jitted, which_dtype, which_np
+from jumpy.core import is_jitted, which_np
+from jumpy.numpy import take
 
 try:
     import jax
@@ -19,19 +20,6 @@ except ImportError:
 F = TypeVar("F", bound=Callable)
 
 
-def array(object: Any, dtype=None) -> ndarray:
-    """Creates an array given a list."""
-    if dtype is None:
-        try:
-            np = which_np(*object)
-        except TypeError:
-            np = which_np(object)  # object is not iterable (e.g. primitive type)
-    else:
-        np = which_dtype(dtype)
-
-    return np.array(object, dtype)
-
-
 def index_update(x: ndarray, idx: ndarray, y: ndarray) -> ndarray:
     """Pure equivalent of x[idx] = y."""
     if which_np(x, idx, y) is jnp:
@@ -40,27 +28,6 @@ def index_update(x: ndarray, idx: ndarray, y: ndarray) -> ndarray:
         x = onp.copy(x)
         x[idx] = y
         return x
-
-
-def meshgrid(
-    *xi, copy: bool = True, sparse: bool = False, indexing: str = "xy"
-) -> ndarray:
-    """Create N-D coordinate matrices from 1D coordinate vectors."""
-    if which_np(xi[0]) is jnp:
-        return jnp.meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
-    else:
-        return onp.meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
-
-
-def take(tree: Any, i: ndarray | Sequence[int] | int, axis: int = 0) -> Any:
-    """Returns tree sliced by i."""
-    if not is_jax_installed:
-        raise NotImplementedError("This function requires the jax module")
-
-    np = which_np(i)
-    if isinstance(i, (list, tuple)):
-        i = np.array(i, dtype=int)
-    return jax.tree_util.tree_map(lambda x: np.take(x, i, axis=axis, mode="clip"), tree)
 
 
 def vmap(fun: F, include: Sequence[bool] | None = None) -> F:

@@ -2,7 +2,8 @@
 import numpy as np
 import pytest
 
-import jumpy as jp
+import jumpy
+import jumpy.numpy as jp
 from jumpy.core import which_dtype, which_np
 
 
@@ -66,31 +67,32 @@ def test_np_linalg_func(func_name, args):
 
 def test_random_funcs():
     """Test all jumpy random functions."""
-    rng = jp.random.PRNGKey(seed=123)
-    rng, rng_1, rng_2, rng_3 = jp.random.split(rng, num=4)
+    rng = jumpy.random.PRNGKey(seed=123)
+    rng, rng_1, rng_2, rng_3 = jumpy.random.split(rng, num=4)
 
-    x = jp.random.uniform(rng)
+    x = jumpy.random.uniform(rng)
     assert 0 <= x <= 1
-    x = jp.random.uniform(rng_1, (2,), low=1, high=2)
+    x = jumpy.random.uniform(rng_1, (2,), low=1, high=2)
     assert np.all(1 <= x) and np.all(x <= 2) and x.shape == (2,)
 
-    x = jp.random.randint(rng_2, (2,), low=2, high=10)
+    x = jumpy.random.randint(rng_2, (2,), low=2, high=10)
     assert np.all(2 <= x) and np.all(x <= 10) and x.shape == (2,)
 
-    x = jp.random.choice(rng_3, 5, shape=(2,))
+    x = jumpy.random.choice(rng_3, 5, shape=(2,))
     assert np.all(0 <= x) and np.all(x <= 5) and x.shape == (2,)
 
 
 @pytest.mark.skipif(
-    jp.is_jax_installed is True, reason="This test requires that jax is not installed."
+    jumpy.is_jax_installed is True,
+    reason="This test requires that jax is not installed.",
 )
 def test_jax_only_funcs():
     """Test jax-only functions."""
     with pytest.raises(NotImplementedError):
-        jp.vmap(lambda x: x + 1)
+        jumpy.vmap(lambda x: x + 1)
 
     with pytest.raises(NotImplementedError):
-        jp.lax.scan(lambda a, b: (b, a + b), init=0, xs=[0, 1, 2])
+        jumpy.lax.scan(lambda a, b: (b, a + b), init=0, xs=[0, 1, 2])
 
     with pytest.raises(NotImplementedError):
         jp.take(tree=jp.array([0, 1, 2]), i=1)
@@ -102,7 +104,7 @@ def test_jax_only_funcs():
 )
 def test_custom_np_func(func_name, kwargs, expected):
     """Test the implementation of custom np functions."""
-    out = getattr(jp, func_name)(**kwargs)
+    out = getattr(jumpy, func_name)(**kwargs)
 
     if isinstance(out, tuple):
         assert all(np.all(a == b) for a, b in zip(out, expected))
@@ -137,7 +139,7 @@ def test_custom_np_func(func_name, kwargs, expected):
 )
 def test_custom_np_lax_func(func_name, kwargs, expected):
     """Test the implementation of custom np functions."""
-    out = getattr(jp.lax, func_name)(**kwargs)
+    out = getattr(jumpy.lax, func_name)(**kwargs)
 
     if isinstance(out, tuple):
         assert all(np.all(a == b) for a, b in zip(out, expected))
@@ -157,7 +159,7 @@ def test_custom_np_lax_func(func_name, kwargs, expected):
 )
 def test_custom_np_ops_func(func_name, kwargs, expected):
     """Test the implementation of custom np functions."""
-    out = getattr(jp.ops, func_name)(**kwargs)
+    out = getattr(jumpy.ops, func_name)(**kwargs)
 
     if isinstance(out, tuple):
         assert all(np.all(a == b) for a, b in zip(out, expected))
@@ -167,7 +169,7 @@ def test_custom_np_ops_func(func_name, kwargs, expected):
 
 def test_meshgrid_cond():
     """Test that meshgrid and cond work as use `*operands` this doesn't work with `test_custom_np_func`."""
-    out = jp.lax.cond(True, lambda x: x[0] + 1, lambda x: x[0] - 1, 5)
+    out = jumpy.lax.cond(True, lambda x: x[0] + 1, lambda x: x[0] - 1, 5)
     expected_out = 6
     assert out == expected_out
 

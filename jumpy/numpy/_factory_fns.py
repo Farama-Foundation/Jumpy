@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from jumpy import ndarray
 from jumpy.core import which_dtype, which_np
 
@@ -12,6 +14,19 @@ def arange(start: int, stop: int, dtype=None) -> ndarray:
         return which_np(start, stop).arange(start, stop, dtype=dtype)
     else:
         return which_dtype(dtype).arange(start, stop, dtype=dtype)
+
+
+def array(object: Any, dtype=None) -> ndarray:
+    """Creates an array given a list."""
+    if dtype is None:
+        try:
+            np = which_np(*object)
+        except TypeError:
+            np = which_np(object)  # object is not iterable (e.g. primitive type)
+    else:
+        np = which_dtype(dtype)
+
+    return np.array(object, dtype)
 
 
 def atleast_1d(*arys) -> ndarray:
@@ -40,6 +55,13 @@ def linspace(start: ndarray, stop: ndarray, num: int, dtype=None) -> ndarray:
         return which_np(start, stop, num).linspace(start, stop, num)
     else:
         return which_dtype(dtype).linspace(start, stop, num, dtype=dtype)
+
+
+def meshgrid(
+    *xi, copy: bool = True, sparse: bool = False, indexing: str = "xy"
+) -> ndarray:
+    """Create N-D coordinate matrices from 1D coordinate vectors."""
+    return which_np(xi[0]).meshgrid(*xi, copy=copy, sparse=sparse, indexing=indexing)
 
 
 def ones(shape, dtype=float) -> ndarray:

@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Sequence
+from typing import Any, Sequence
 
-from jumpy import ndarray
+try:
+    import jax
+except ImportError:
+    jax = None
+
+from jumpy import is_jax_installed, ndarray
 from jumpy.core import custom_jvp, which_np
 
 
@@ -221,6 +226,17 @@ def stack(x: list[ndarray], axis=0) -> ndarray:
 def sum(a: ndarray, axis: int | None = None):
     """Returns sum of array elements over a given axis."""
     return which_np(a).sum(a, axis=axis)
+
+
+def take(tree: Any, i: ndarray | Sequence[int] | int, axis: int = 0) -> Any:
+    """Returns tree sliced by i."""
+    if not is_jax_installed:
+        raise NotImplementedError("This function requires the jax module")
+
+    np = which_np(i)
+    if isinstance(i, (list, tuple)):
+        i = np.array(i, dtype=int)
+    return jax.tree_util.tree_map(lambda x: np.take(x, i, axis=axis, mode="clip"), tree)
 
 
 def tanh(x: ndarray) -> ndarray:

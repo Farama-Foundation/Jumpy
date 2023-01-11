@@ -4,7 +4,8 @@ import numpy as onp
 import pytest
 from jax import numpy as jnp
 
-import jumpy as jp
+import jumpy
+import jumpy.numpy as jp
 
 
 @pytest.mark.parametrize(
@@ -26,4 +27,4 @@ import jumpy as jp
 )
 def test_segment_sum(data, segment_ids, ret):
     """Checks if the result of `segment_sum` on the given inputs equals the expected output."""
-    assert onp.array_equal(jp.ops.segment_sum(data, segment_ids), ret)
+    assert onp.array_equal(jumpy.ops.segment_sum(data, segment_ids), ret)
