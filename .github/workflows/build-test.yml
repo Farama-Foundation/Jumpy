@@ -35,4 +35,4 @@ jobs:
           pip install ".[testing]"  
           ## We are not including jax
       - name: Run tests
-        run: pytest tests/test_numpy_only.py
+        run: pytest tests/test_only_numpy.py

@@ -1,11 +1,21 @@
 """Tests that the `norm` and `safe_norm` work as expected."""
 
+
+import jax.numpy as jnp
 import numpy as onp
 import pytest
 from jax import grad
-from jax import numpy as jnp
 
-import jumpy as jp
+import jumpy.numpy as jp
+
+
+def test_norm():
+    """Calls the function `norm` on both `onp.array` and `jnp.array` to check it doesn't raise an error."""
+    A = onp.array([1, 2, 3])
+    B = jnp.array([1, 2, 3])
+
+    jp.linalg.norm(A)
+    jp.linalg.norm(B)
 
 
 @pytest.mark.parametrize(
@@ -20,10 +30,10 @@ import jumpy as jp
         ([[1, 0], [1, 1]], (0, 1)),
     ],
 )
-def test_norm(x, axis):
+def test_safe_norm(x, axis):
     """Checks equivalence in jax and numpy arrays."""
     x = jnp.array(x)
-    norm = jp.safe_norm(x, axis=axis)
+    norm = jp.linalg.safe_norm(x, axis=axis)
 
     if isinstance(norm, jnp.ndarray):
         assert onp.array_equal(norm, jnp.linalg.norm(x, axis=axis))
@@ -55,6 +65,6 @@ def test_norm(x, axis):
 )
 def test_gradient(x, axis, res):
     """Tests the gradient of the `safe_norm` function."""
-    fun = grad(lambda x: jp.safe_norm(x, axis=axis))
+    fun = grad(lambda y: jp.linalg.safe_norm(y, axis=axis))
 
     assert onp.array_equal(fun(x), res)
