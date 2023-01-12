@@ -1,10 +1,10 @@
 import numpy as onp
+
 import jumpy
 
 if jumpy.is_jax_installed:
     import jax
     import jax._src.numpy.lax_numpy as lax_numpy
-
 
     def jumpy_view(arr, maybe_subtype, *args, **kwargs):
         if maybe_subtype == jparray:
@@ -34,100 +34,101 @@ class jparray(onp.ndarray):
 
 # Note: this docstring will appear as the docstring for the `at` property.
 class _IndexUpdateHelper:
-  """Helper property for index update functionality.
+    """Helper property for index update functionality.
 
-  The ``at`` property provides a functionally pure equivalent of in-place
-  array modificatons.
+    The ``at`` property provides a functionally pure equivalent of in-place
+    array modificatons.
 
-  In particular:
+    In particular:
 
-  ==============================  ================================
-  Alternate syntax                Equivalent In-place expression
-  ==============================  ================================
-  ``x = x.at[idx].set(y)``        ``x[idx] = y``
-  ``x = x.at[idx].add(y)``        ``x[idx] += y``
-  ``x = x.at[idx].multiply(y)``   ``x[idx] *= y``
-  ``x = x.at[idx].divide(y)``     ``x[idx] /= y``
-  ``x = x.at[idx].power(y)``      ``x[idx] **= y``
-  ``x = x.at[idx].min(y)``        ``x[idx] = minimum(x[idx], y)``
-  ``x = x.at[idx].max(y)``        ``x[idx] = maximum(x[idx], y)``
-  ``x = x.at[idx].apply(ufunc)``  ``ufunc.at(x, idx)``
-  ``x = x.at[idx].get()``         ``x = x[idx]``
-  ==============================  ================================
+    ==============================  ================================
+    Alternate syntax                Equivalent In-place expression
+    ==============================  ================================
+    ``x = x.at[idx].set(y)``        ``x[idx] = y``
+    ``x = x.at[idx].add(y)``        ``x[idx] += y``
+    ``x = x.at[idx].multiply(y)``   ``x[idx] *= y``
+    ``x = x.at[idx].divide(y)``     ``x[idx] /= y``
+    ``x = x.at[idx].power(y)``      ``x[idx] **= y``
+    ``x = x.at[idx].min(y)``        ``x[idx] = minimum(x[idx], y)``
+    ``x = x.at[idx].max(y)``        ``x[idx] = maximum(x[idx], y)``
+    ``x = x.at[idx].apply(ufunc)``  ``ufunc.at(x, idx)``
+    ``x = x.at[idx].get()``         ``x = x[idx]``
+    ==============================  ================================
 
-  None of the ``x.at`` expressions modify the original ``x``; instead they return
-  a modified copy of ``x``. However, inside a :py:func:`~jax.jit` compiled function,
-  expressions like :code:`x = x.at[idx].set(y)` are guaranteed to be applied in-place.
+    None of the ``x.at`` expressions modify the original ``x``; instead they return
+    a modified copy of ``x``. However, inside a :py:func:`~jax.jit` compiled function,
+    expressions like :code:`x = x.at[idx].set(y)` are guaranteed to be applied in-place.
 
-  Unlike NumPy in-place operations such as :code:`x[idx] += y`, if multiple
-  indices refer to the same location, all updates will be applied (NumPy would
-  only apply the last update, rather than applying all updates.) The order
-  in which conflicting updates are applied is implementation-defined and may be
-  nondeterministic (e.g., due to concurrency on some hardware platforms).
+    Unlike NumPy in-place operations such as :code:`x[idx] += y`, if multiple
+    indices refer to the same location, all updates will be applied (NumPy would
+    only apply the last update, rather than applying all updates.) The order
+    in which conflicting updates are applied is implementation-defined and may be
+    nondeterministic (e.g., due to concurrency on some hardware platforms).
 
-  By default, JAX assumes that all indices are in-bounds. There is experimental
-  support for giving more precise semantics to out-of-bounds indexed accesses,
-  via the ``mode`` parameter (see below).
+    By default, JAX assumes that all indices are in-bounds. There is experimental
+    support for giving more precise semantics to out-of-bounds indexed accesses,
+    via the ``mode`` parameter (see below).
 
-  Arguments
-  ---------
-  mode : str
-      Specify out-of-bound indexing mode. Options are:
+    Arguments
+    ---------
+    mode : str
+        Specify out-of-bound indexing mode. Options are:
 
-      - ``"promise_in_bounds"``: (default) The user promises that indices are in bounds.
-        No additional checking will be performed. In practice, this means that
-        out-of-bounds indices in ``get()`` will be clipped, and out-of-bounds indices
-        in ``set()``, ``add()``, etc. will be dropped.
-      - ``"clip"``: clamp out of bounds indices into valid range.
-      - ``"drop"``: ignore out-of-bound indices.
-      - ``"fill"``: alias for ``"drop"``.  For `get()`, the optional ``fill_value``
-        argument specifies the value that will be returned.
+        - ``"promise_in_bounds"``: (default) The user promises that indices are in bounds.
+          No additional checking will be performed. In practice, this means that
+          out-of-bounds indices in ``get()`` will be clipped, and out-of-bounds indices
+          in ``set()``, ``add()``, etc. will be dropped.
+        - ``"clip"``: clamp out of bounds indices into valid range.
+        - ``"drop"``: ignore out-of-bound indices.
+        - ``"fill"``: alias for ``"drop"``.  For `get()`, the optional ``fill_value``
+          argument specifies the value that will be returned.
 
-        See :class:`jax.lax.GatherScatterMode` for more details.
+          See :class:`jax.lax.GatherScatterMode` for more details.
 
-  indices_are_sorted : bool
-      If True, the implementation will assume that the indices passed to ``at[]``
-      are sorted in ascending order, which can lead to more efficient execution
-      on some backends.
-  unique_indices : bool
-      If True, the implementation will assume that the indices passed to ``at[]``
-      are unique, which can result in more efficient execution on some backends.
-  fill_value : Any
-      Only applies to the ``get()`` method: the fill value to return for out-of-bounds
-      slices when `mode` is ``'fill'``. Ignored otherwise. Defaults to ``NaN`` for
-      inexact types, the largest negative value for signed types, the largest positive
-      value for unsigned types, and ``True`` for booleans.
+    indices_are_sorted : bool
+        If True, the implementation will assume that the indices passed to ``at[]``
+        are sorted in ascending order, which can lead to more efficient execution
+        on some backends.
+    unique_indices : bool
+        If True, the implementation will assume that the indices passed to ``at[]``
+        are unique, which can result in more efficient execution on some backends.
+    fill_value : Any
+        Only applies to the ``get()`` method: the fill value to return for out-of-bounds
+        slices when `mode` is ``'fill'``. Ignored otherwise. Defaults to ``NaN`` for
+        inexact types, the largest negative value for signed types, the largest positive
+        value for unsigned types, and ``True`` for booleans.
 
-  Examples
-  --------
-  >>> x = jnp.arange(5.0)
-  >>> x
-  DeviceArray([0., 1., 2., 3., 4.], dtype=float32)
-  >>> x.at[2].add(10)
-  DeviceArray([ 0.,  1., 12.,  3.,  4.], dtype=float32)
-  >>> x.at[10].add(10)  # out-of-bounds indices are ignored
-  DeviceArray([0., 1., 2., 3., 4.], dtype=float32)
-  >>> x.at[20].add(10, mode='clip')
-  DeviceArray([ 0.,  1.,  2.,  3., 14.], dtype=float32)
-  >>> x.at[2].get()
-  DeviceArray(2., dtype=float32)
-  >>> x.at[20].get()  # out-of-bounds indices clipped
-  DeviceArray(4., dtype=float32)
-  >>> x.at[20].get(mode='fill')  # out-of-bounds indices filled with NaN
-  DeviceArray(nan, dtype=float32)
-  >>> x.at[20].get(mode='fill', fill_value=-1)  # custom fill value
-  DeviceArray(-1., dtype=float32)
-  """
-  __slots__ = ("array",)
+    Examples
+    --------
+    >>> x = jnp.arange(5.0)
+    >>> x
+    DeviceArray([0., 1., 2., 3., 4.], dtype=float32)
+    >>> x.at[2].add(10)
+    DeviceArray([ 0.,  1., 12.,  3.,  4.], dtype=float32)
+    >>> x.at[10].add(10)  # out-of-bounds indices are ignored
+    DeviceArray([0., 1., 2., 3., 4.], dtype=float32)
+    >>> x.at[20].add(10, mode='clip')
+    DeviceArray([ 0.,  1.,  2.,  3., 14.], dtype=float32)
+    >>> x.at[2].get()
+    DeviceArray(2., dtype=float32)
+    >>> x.at[20].get()  # out-of-bounds indices clipped
+    DeviceArray(4., dtype=float32)
+    >>> x.at[20].get(mode='fill')  # out-of-bounds indices filled with NaN
+    DeviceArray(nan, dtype=float32)
+    >>> x.at[20].get(mode='fill', fill_value=-1)  # custom fill value
+    DeviceArray(-1., dtype=float32)
+    """
 
-  def __init__(self, array):
-    self.array = array
+    __slots__ = ("array",)
 
-  def __getitem__(self, index):
-    return _IndexUpdateRef(self.array, index)
+    def __init__(self, array):
+        self.array = array
 
-  def __repr__(self):
-    return f"_IndexUpdateHelper({repr(self.array)})"
+    def __getitem__(self, index):
+        return _IndexUpdateRef(self.array, index)
+
+    def __repr__(self):
+        return f"_IndexUpdateHelper({repr(self.array)})"
 
 
 class _IndexUpdateRef:
@@ -137,6 +138,7 @@ class _IndexUpdateRef:
     Methods on this object return copies of the source array that have been
     modified at the positions specified by the indexer.
     """
+
     __slots__ = ("array", "index")
 
     def __init__(self, array, index):
@@ -146,7 +148,9 @@ class _IndexUpdateRef:
     def __repr__(self):
         return f"_IndexUpdateRef({repr(self.array)}, {repr(self.index)})"
 
-    def get(self, indices_are_sorted=False, unique_indices=False, mode=None, fill_value=None):
+    def get(
+        self, indices_are_sorted=False, unique_indices=False, mode=None, fill_value=None
+    ):
         """Equivalent to ``x[idx]``.
 
         Returns the value of ``x`` that would result from the NumPy-style
@@ -184,9 +188,11 @@ class _IndexUpdateRef:
 
         See :mod:`jax.ops` for details.
         """
-        raise NotImplementedError("Not implemented yet. Seems that jax API has a bug. "
-                                  "jax_arr.at[1:2].apply(lambda x: x + 1) works, but"
-                                  "jax_arr.at[2].apply(lambda x: x + 1) raises an error.")
+        raise NotImplementedError(
+            "Not implemented yet. Seems that jax API has a bug. "
+            "jax_arr.at[1:2].apply(lambda x: x + 1) works, but"
+            "jax_arr.at[2].apply(lambda x: x + 1) raises an error."
+        )
         # array_copy = self.array.copy()
         # array_copy[self.index] = func(array_copy[self.index])
         # return array_copy
@@ -203,7 +209,9 @@ class _IndexUpdateRef:
         array_copy[self.index] += values
         return array_copy
 
-    def multiply(self, values, indices_are_sorted=False, unique_indices=False, mode=None):
+    def multiply(
+        self, values, indices_are_sorted=False, unique_indices=False, mode=None
+    ):
         """Pure equivalent of ``x[idx] *= y``.
 
         Returns the value of ``x`` that would result from the NumPy-style
@@ -247,7 +255,7 @@ class _IndexUpdateRef:
         # !NOTE: Strange jax behavior for integers with negative powers. We raise an error for now in that case.
         #   Can be reproduced with jax.numpy.arange(10).at[-1].power(-2) = array([0, 1, 2, 3, 4, 5, 6, 7, 8, -77356367], dtype=int32)
         array_copy = self.array.copy()
-        array_copy[self.index] **= values #onp.power(array_copy[self.index], values)
+        array_copy[self.index] **= values  # onp.power(array_copy[self.index], values)
         return array_copy
 
     def min(self, values, indices_are_sorted=False, unique_indices=False, mode=None):
