@@ -24,6 +24,7 @@ except ImportError:
 
 from jumpy import lax, ops, random
 from jumpy._base_fns import index_update, vmap
+from jumpy._indexing import jparray
 
 __all__ = [
     # === primitives ===
@@ -33,6 +34,7 @@ __all__ = [
     "float32",
     "int32",
     "ndarray",
+    "jparray",
     # === sub-modules ===
     "random",
     "numpy",
