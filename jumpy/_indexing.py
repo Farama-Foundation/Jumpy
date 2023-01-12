@@ -7,6 +7,10 @@ if jumpy.is_jax_installed:
     import jax._src.numpy.lax_numpy as lax_numpy
 
     def jumpy_view(arr, maybe_subtype, *args, **kwargs):
+        """This serves as a NOOP decorator for all jax array `.view` methods.
+
+        Unfortunately, jax arrays already have a `.view` method. To allow jumpy users to call `.view` on jax arrays when they
+        intend to use jumpy, we need to override the jax `.view` method with a NOOP decorator."""
         if maybe_subtype == jparray:
             return arr
         else:
@@ -23,10 +27,16 @@ if jumpy.is_jax_installed:
 
 class jparray(onp.ndarray):
     """A numpy.ndarray with additional JAX methods.
+
     Based on: https://numpy.org/doc/stable/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
     """
 
     def __array_finalize__(self, obj):
+        """This method is the mechanism that numpy provides to allow this subclass to handle how new instances get created.
+
+        More info on the role of this method can be found here:
+        https://numpy.org/doc/stable/user/basics.subclassing.html#the-role-of-array-finalize
+        """
         # Only do this for numpy arrays
         if isinstance(obj, onp.ndarray):
             setattr(self, "at", _IndexUpdateHelper(self))

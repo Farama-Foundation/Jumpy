@@ -1,3 +1,4 @@
+"""Test indexing on numpy arrays according to jax array index API."""
 import jax
 import numpy as onp
 
@@ -5,6 +6,7 @@ import jumpy
 
 
 def test_indexing():
+    """Test indexing on numpy arrays according to jax array index API."""
     # Prepare two different arrays for testing
     a = onp.arange(0, 10)
     b = jax.numpy.arange(0, 10)
