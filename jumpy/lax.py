@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Sequence, TypeVar
 
 import numpy as onp
 
@@ -19,7 +19,15 @@ except ImportError:
     jax, jnp = None, None
 
 
-__all__ = ["cond", "switch", "fori_loop", "scan", "top_k", "while_loop", "stop_gradient"]
+__all__ = [
+    "cond",
+    "switch",
+    "fori_loop",
+    "scan",
+    "top_k",
+    "while_loop",
+    "stop_gradient",
+]
 
 Carry = TypeVar("Carry")
 X = TypeVar("X")
