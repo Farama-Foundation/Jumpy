@@ -100,3 +100,11 @@ def while_loop(
         while cond_fun(val):
             val = body_fun(val)
         return val
+
+
+def stop_gradient(x: X) -> X:
+    """Returns x with zero gradient."""
+    if which_np(x) is jnp:
+        return jax.lax.stop_gradient(x)
+    else:
+        return x
