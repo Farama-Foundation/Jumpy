@@ -10,7 +10,8 @@ if jumpy.is_jax_installed:
         """This serves as a NOOP decorator for all jax array `.view` methods.
 
         Unfortunately, jax arrays already have a `.view` method. To allow jumpy users to call `.view` on jax arrays when they
-        intend to use jumpy, we need to override the jax `.view` method with a NOOP decorator."""
+        intend to use jumpy, we need to override the jax `.view` method with a NOOP decorator.
+        """
         if maybe_subtype == jparray:
             return arr
         else:

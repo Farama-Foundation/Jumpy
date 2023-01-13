@@ -1,7 +1,7 @@
 """Jumpy module."""
 
 try:
-    import jax.numpy as jnp
+    import jax.numpy as jnp  # noqa: F401
 
     is_jax_installed = True
 except ImportError:
