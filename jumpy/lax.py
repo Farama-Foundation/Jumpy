@@ -36,14 +36,14 @@ def cond(
             return false_fun(operands)
 
 
-def fori_loop(lower: int, upper: int, body_fun: Callable[[X], X], init_val: X) -> X:
+def fori_loop(lower: int, upper: int, body_fun: Callable[[int, X], X], init_val: X) -> X:
     """Call body_fun over range from lower to upper, starting with init_val."""
     if is_jitted():
         return jax.lax.fori_loop(lower, upper, body_fun, init_val)
     else:
         val = init_val
-        for _ in range(lower, upper):
-            val = body_fun(val)
+        for i in range(lower, upper):
+            val = body_fun(i, val)
         return val
 
 
