@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, Sequence
 
 import numpy as onp
 
@@ -19,7 +19,7 @@ except ImportError:
     jax, jnp = None, None
 
 
-__all__ = ["cond", "fori_loop", "scan", "top_k", "while_loop"]
+__all__ = ["cond", "switch", "fori_loop", "scan", "top_k", "while_loop", "stop_gradient"]
 
 Carry = TypeVar("Carry")
 X = TypeVar("X")
@@ -37,6 +37,23 @@ def cond(
             return true_fun(*operands)
         else:
             return false_fun(*operands)
+
+
+def switch(index: int, branches: Sequence[Callable], *operands: Any):
+    """Conditionally apply exactly one of ``branches`` given by ``index`` operands.
+
+    Has the semantics of the following Python::
+
+        def switch(index, branches, *operands):
+          index = clamp(0, index, len(branches) - 1)
+          return branches[index](*operands)
+    """
+    if is_jitted():
+        return jax.lax.switch(index, branches, *operands)
+    else:
+        # NOTE: should we clamp to mimic jax behavior? Or raise an error for out of bounds indices?
+        # index = onp.clip(index, 0, len(branches) - 1)
+        return branches[index](*operands)
 
 
 def fori_loop(
