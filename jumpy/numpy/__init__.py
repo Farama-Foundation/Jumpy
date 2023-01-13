@@ -61,8 +61,16 @@ from jumpy.numpy._transform_data import (
     var,
     where,
 )
+from jumpy.numpy._types import dtype, float32, inf, int32, ndarray, pi
 
 __all__ = [
+    # === primitives ===
+    "dtype",
+    "pi",
+    "inf",
+    "float32",
+    "int32",
+    "ndarray",
     # === sub-modules ===
     "linalg",
     # === create data functions ===

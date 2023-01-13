@@ -125,7 +125,7 @@ def test_custom_np_func(func_name, kwargs, expected):
             {
                 "lower": 0,
                 "upper": 4,
-                "body_fun": lambda x: x + [len(x)],
+                "body_fun": lambda i, x: x + [len(x)],
                 "init_val": [],
             },
             [0, 1, 2, 3],

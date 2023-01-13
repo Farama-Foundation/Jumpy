@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 import numpy as onp
 
-from jumpy import is_jax_installed, ndarray
+from jumpy import is_jax_installed
 from jumpy.core import is_jitted, which_np
+
+if TYPE_CHECKING:
+    from jumpy.numpy import ndarray
 
 try:
     import jax
@@ -36,7 +39,9 @@ def cond(
             return false_fun(operands)
 
 
-def fori_loop(lower: int, upper: int, body_fun: Callable[[int, X], X], init_val: X) -> X:
+def fori_loop(
+    lower: int, upper: int, body_fun: Callable[[int, X], X], init_val: X
+) -> X:
     """Call body_fun over range from lower to upper, starting with init_val."""
     if is_jitted():
         return jax.lax.fori_loop(lower, upper, body_fun, init_val)

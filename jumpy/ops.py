@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as onp
 
-from jumpy import ndarray
 from jumpy.core import which_np
+
+if TYPE_CHECKING:
+    from jumpy.numpy import ndarray
 
 try:
     import jax

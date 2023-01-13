@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Callable, Sequence, TypeVar
+from typing import TYPE_CHECKING, Callable, Sequence, TypeVar
 
 import numpy as onp
 
-from jumpy import is_jax_installed, ndarray
+from jumpy import is_jax_installed
 from jumpy.core import is_jitted, which_np
-from jumpy.numpy import take
+from jumpy.numpy import ndarray, take
 
 try:
     import jax

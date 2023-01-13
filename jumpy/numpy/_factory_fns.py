@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from jumpy import ndarray
 from jumpy.core import which_dtype, which_np
+from jumpy.numpy._types import ndarray
 
 
 def arange(start: int, stop: int, dtype=None) -> ndarray:
