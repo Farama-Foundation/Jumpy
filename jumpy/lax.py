@@ -34,9 +34,9 @@ def cond(
         return jax.lax.cond(pred, true_fun, false_fun, *operands)
     else:
         if pred:
-            return true_fun(operands)
+            return true_fun(*operands)
         else:
-            return false_fun(operands)
+            return false_fun(*operands)
 
 
 def fori_loop(
