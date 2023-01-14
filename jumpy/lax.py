@@ -21,12 +21,12 @@ except ImportError:
 
 __all__ = [
     "cond",
-    "switch",
     "fori_loop",
+    "switch",
     "scan",
+    "stop_gradient",
     "top_k",
     "while_loop",
-    "stop_gradient",
 ]
 
 Carry = TypeVar("Carry")

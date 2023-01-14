@@ -10,11 +10,9 @@ except ImportError:
 
 from jumpy import core, lax, ops, random
 from jumpy._base_fns import index_update, vmap
-from jumpy._indexing import jparray
 
 __all__ = [
     # === primitives ===
-    "jparray",
     # === sub-modules ===
     "core",
     "random",
