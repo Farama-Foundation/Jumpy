@@ -18,6 +18,7 @@ else:
 dtype = onp.dtype
 float32 = onp.float32
 int32 = onp.int32
+uint8 = onp.uint8
 
 # Special values
 pi = onp.pi

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Sequence, TypeVar
+from typing import Callable, Sequence, TypeVar
 
 import numpy as onp
 
