@@ -125,7 +125,7 @@ def test_custom_np_func(func_name, kwargs, expected):
             {
                 "lower": 0,
                 "upper": 4,
-                "body_fun": lambda x: x + [len(x)],
+                "body_fun": lambda i, x: x + [len(x)],
                 "init_val": [],
             },
             [0, 1, 2, 3],
@@ -169,7 +169,7 @@ def test_custom_np_ops_func(func_name, kwargs, expected):
 
 def test_meshgrid_cond():
     """Test that meshgrid and cond work as use `*operands` this doesn't work with `test_custom_np_func`."""
-    out = jumpy.lax.cond(True, lambda x: x[0] + 1, lambda x: x[0] - 1, 5)
+    out = jumpy.lax.cond(True, lambda *x: x[0] + 1, lambda *x: x[0] - 1, 5)
     expected_out = 6
     assert out == expected_out
 

@@ -8,7 +8,7 @@ Jumpy is a common backend for [NumPy](https://numpy.org/) and optionally [JAX](h
 * If Jax is installed and the function is jitted then the `jax.numpy` function is run
 * Otherwise the jumpy function returns the NumPy outputs
 
-There are several functions (e.g. `vmap`, `scan`) that available with `jax` installed.
+There are several functions (e.g. `vmap`, `scan`) that are available with `jax` installed.
 
 Jumpy lets you write framework-agnostic code that is easy to debug by running
 as raw Numpy, but is just as performant as JAX when jitted.

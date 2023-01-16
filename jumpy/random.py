@@ -1,12 +1,14 @@
 """Module for random functions in jumpy."""
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as onp
 
-from jumpy import ndarray
 from jumpy.core import which_np
+
+if TYPE_CHECKING:
+    from jumpy.numpy import ndarray
 
 try:
     import jax
@@ -26,7 +28,8 @@ __all__ = [
 
 def PRNGKey(seed: int) -> ndarray:
     """Returns a PRNG key given a seed."""
-    if which_np() is jnp:
+    # NOTE: selects backend based on seed type.
+    if which_np(seed) is jnp:
         return jax.random.PRNGKey(seed)
     else:
         rng = onp.random.default_rng(seed)

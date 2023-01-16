@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import numpy as onp
 
-from jumpy import ndarray
 from jumpy.core import which_np
+from jumpy.numpy._types import ndarray
 
 try:
     import jax.numpy as jnp

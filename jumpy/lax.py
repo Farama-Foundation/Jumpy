@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Sequence, TypeVar
 
 import numpy as onp
 
-from jumpy import is_jax_installed, ndarray
+from jumpy import is_jax_installed
 from jumpy.core import is_jitted, which_np
+
+if TYPE_CHECKING:
+    from jumpy.numpy import ndarray
 
 try:
     import jax
@@ -16,7 +19,15 @@ except ImportError:
     jax, jnp = None, None
 
 
-__all__ = ["cond", "fori_loop", "scan", "top_k", "while_loop"]
+__all__ = [
+    "cond",
+    "fori_loop",
+    "switch",
+    "scan",
+    "stop_gradient",
+    "top_k",
+    "while_loop",
+]
 
 Carry = TypeVar("Carry")
 X = TypeVar("X")
@@ -31,19 +42,38 @@ def cond(
         return jax.lax.cond(pred, true_fun, false_fun, *operands)
     else:
         if pred:
-            return true_fun(operands)
+            return true_fun(*operands)
         else:
-            return false_fun(operands)
+            return false_fun(*operands)
 
 
-def fori_loop(lower: int, upper: int, body_fun: Callable[[X], X], init_val: X) -> X:
+def switch(index: int, branches: Sequence[Callable], *operands: Any):
+    """Conditionally apply exactly one of ``branches`` given by ``index`` operands.
+
+    Has the semantics of the following Python::
+
+        def switch(index, branches, *operands):
+          index = clamp(0, index, len(branches) - 1)
+          return branches[index](*operands)
+    """
+    if is_jitted():
+        return jax.lax.switch(index, branches, *operands)
+    else:
+        # NOTE: should we clamp to mimic jax behavior? Or raise an error for out of bounds indices?
+        # index = onp.clip(index, 0, len(branches) - 1)
+        return branches[index](*operands)
+
+
+def fori_loop(
+    lower: int, upper: int, body_fun: Callable[[int, X], X], init_val: X
+) -> X:
     """Call body_fun over range from lower to upper, starting with init_val."""
     if is_jitted():
         return jax.lax.fori_loop(lower, upper, body_fun, init_val)
     else:
         val = init_val
-        for _ in range(lower, upper):
-            val = body_fun(val)
+        for i in range(lower, upper):
+            val = body_fun(i, val)
         return val
 
 
@@ -95,3 +125,11 @@ def while_loop(
         while cond_fun(val):
             val = body_fun(val)
         return val
+
+
+def stop_gradient(x: X) -> X:
+    """Returns x with zero gradient."""
+    if which_np(x) is jnp:
+        return jax.lax.stop_gradient(x)
+    else:
+        return x

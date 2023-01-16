@@ -9,8 +9,9 @@ try:
 except ImportError:
     jax = None
 
-from jumpy import is_jax_installed, ndarray
+from jumpy import is_jax_installed
 from jumpy.core import custom_jvp, which_np
+from jumpy.numpy._types import ndarray
 
 
 def abs(a: ndarray) -> ndarray:
