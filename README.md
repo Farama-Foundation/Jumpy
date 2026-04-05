@@ -1,3 +1,5 @@
+**Apr 5, 2026: This project has been deprecated due to a lack of widespread community use, and is no longer planned to receive any additional updates or support.**
+
 <p align="center">
     <img src="https://raw.githubusercontent.com/Farama-Foundation/Jumpy/main/.github/jumpy-text.png" width="500px"/>
 </p>
