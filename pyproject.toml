@@ -41,7 +41,7 @@ jax = [
     "jaxlib>=0.3.24"
 ]
 testing = [
-    "pytest==7.1.3",
+    "pytest==9.0.3",
 ]
 
 [tool.setuptools.packages.find]
